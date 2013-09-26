@@ -1,0 +1,13 @@
+.ackrc
+.git
+.gitignore
+blib
+CompanyDesignator.pm
+EXCLUDE
+inc
+Makefile
+Makefile.old
+MANIFEST.bak
+MANIFEST.SKIP
+MYMETA.*
+TODO
