@@ -129,6 +129,14 @@ sub _build_regex {
   # Workaround by lexing and using insert()
   for my $string (@patterns) {
     $self->assembler->insert(map { /\./ ? '\\.?' : $_ } split //, $string);
+    # Also add variants without unicode diacritics to catch misspellings
+    if ($string =~ m/\pM/) {
+      my $stripped_string = $string;
+      $stripped_string =~ s/\pM//g;
+      $self->assembler->insert(map { /\./ ? '\\.?' : $_ } split //, $stripped_string);
+      # Add stripped_string to pattern_string_map
+      $self->pattern_string_map->{$stripped_string} ||= $self->pattern_string_map->{$string};
+    }
   }
 
   return $self->assembler->re;
