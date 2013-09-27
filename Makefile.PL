@@ -14,5 +14,7 @@ requires 'Regexp::Assemble';
 
 auto_install;
 
+install_share;
+
 WriteAll;
 

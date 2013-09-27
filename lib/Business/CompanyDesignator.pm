@@ -6,7 +6,7 @@ use 5.010;
 use Mouse;
 use FindBin qw($Bin);
 use YAML;
-use File::ShareDir qw(module_file);
+use File::ShareDir qw(dist_file);
 use List::MoreUtils qw(uniq);
 use Regexp::Assemble;
 
@@ -19,7 +19,7 @@ has 'datafile' => ( is => 'ro', default => sub {
   $local_datafile = "$Bin/../share/company_designator.yml";
   return $local_datafile if -f $local_datafile;
   # Installed version
-  return module_file('Business::CompanyDesignator', 'company_designator.yml');
+  return dist_file('Business-CompanyDesignator', 'company_designator.yml');
 });
 
 has [ qw(data assembler patterns regex) ]
@@ -35,7 +35,8 @@ sub _build_data {
 
 sub _build_assembler {
   my $self = shift;
-  Regexp::Assemble->new->track(1);
+  # RA constructor - case insensitive, with match tracking
+  Regexp::Assemble->new->flags('i')->track(1);
 }
 
 sub long_designators {
