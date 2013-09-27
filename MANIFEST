@@ -1,10 +1,9 @@
 Changes
-ignore.txt
+lib/Business/CompanyDesignator.pm
 MANIFEST
 META.yml
 README
 share/company_designator.yml
-t/00-load.t
 t/00_load.t
 t/01_data.t
 t/02_designators.t
