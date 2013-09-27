@@ -3,12 +3,14 @@ package Business::CompanyDesignator;
 # Require perl 5.010 because the 'track' functionality of Regexp::Assemble
 # is unsafe for earlier versions.
 use 5.010;
+use warnings qw(FATAL utf8);
 use Mouse;
 use FindBin qw($Bin);
 use YAML;
 use File::ShareDir qw(dist_file);
 use List::MoreUtils qw(uniq);
 use Regexp::Assemble;
+use Unicode::Normalize;
 
 our $VERSION = '0.01';
 
@@ -88,6 +90,7 @@ sub _build_patterns {
   # Build patterns list and patterns map
   my (@pattern_long, @pattern_abbr);
   while (my ($long_designator, $entry) = each %{ $self->data }) {
+    $long_designator = NFD($long_designator);
     # Add long_designator patterns
     push @pattern_long, $long_designator;
     my $pattern = $self->_string_to_pattern($long_designator);
@@ -98,6 +101,7 @@ sub _build_patterns {
     if (my $abbr_list = $entry->{abbr}) {
       $abbr_list = [ $abbr_list ] if ! ref $abbr_list;
       for my $abbr (@$abbr_list) {
+        $abbr = NFD($abbr);
         push @pattern_abbr, $abbr;
         $pattern = $self->_string_to_pattern($abbr);
 #       push @pattern_abbr, $pattern;
@@ -136,12 +140,13 @@ sub _build_regex {
 sub strip_designator {
   my $self = shift;
   my $company_name = shift;
+  my $company_name_match = NFD($company_name);
 
   my $re = $self->regex;
 
-  if ($company_name =~ m/(.*?)\s*($re)\s*$/) {
+  if ($company_name_match =~ m/(.*?)\s*($re)\s*$/) {
     my $matched = $self->assembler->source($^R);
-    return wantarray ? ($1, $2, $self->pattern_string_map->{$matched}) : $1;
+    return wantarray ? (NFC($1), NFC($2), NFC($self->pattern_string_map->{$matched})) : NFC($1);
 #   my $long_designators = $self->pattern_long_map->{ $pattern_matched };
 #   my $match = Business::CompanyDesignator::Match->new(
 #     pattern           => $pattern_matched,

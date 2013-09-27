@@ -11,6 +11,7 @@ requires 'Mouse';
 requires 'File::ShareDir';
 requires 'List::MoreUtils';
 requires 'Regexp::Assemble';
+requires 'Unicode::Normalize';
 
 auto_install;
 
