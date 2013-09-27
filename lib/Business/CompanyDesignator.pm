@@ -66,8 +66,8 @@ sub _string_to_pattern {
   my ($self, $string) = @_;
   my $pattern = $string;
 
-  # Treat all periods as optional
-  $pattern =~ s/\./\\.?/g;
+  # Treat all periods as optional, and allow random whitespace between elements
+  $pattern =~ s/\./\\.?\\s*?/g;
 
   # Record mapping in pattern_string_map
   $self->pattern_string_map->{$pattern} = $string;
@@ -128,12 +128,12 @@ sub _build_regex {
   # $self->assembler->add(@patterns);
   # Workaround by lexing and using insert()
   for my $string (@patterns) {
-    $self->assembler->insert(map { /\./ ? '\\.?' : $_ } split //, $string);
+    $self->assembler->insert(map { /\./ ? '\\.?\\s*?' : $_ } split //, $string);
     # Also add variants without unicode diacritics to catch misspellings
     if ($string =~ m/\pM/) {
       my $stripped_string = $string;
       $stripped_string =~ s/\pM//g;
-      $self->assembler->insert(map { /\./ ? '\\.?' : $_ } split //, $stripped_string);
+      $self->assembler->insert(map { /\./ ? '\\.?\\s*?' : $_ } split //, $stripped_string);
       # Add stripped_string to pattern_string_map
       $self->pattern_string_map->{$stripped_string} ||= $self->pattern_string_map->{$string};
     }
