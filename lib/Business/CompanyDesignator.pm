@@ -22,7 +22,7 @@ has 'datafile' => ( is => 'ro', default => sub {
   return module_file('Business::CompanyDesignator', 'company_designator.yml');
 });
 
-has [ qw(data assembler patterns designator_regex) ]
+has [ qw(data assembler patterns regex) ]
   => ( is => 'ro', lazy_build => 1 );
 
 has 'pattern_long_map'   => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
@@ -112,7 +112,7 @@ sub _build_patterns {
 }
 
 # Assemble designator regex
-sub _build_designator_regex {
+sub _build_regex {
   my $self = shift;
 
   my @patterns = @{ $self->patterns };
@@ -136,7 +136,7 @@ sub strip_designator {
   my $self = shift;
   my $company_name = shift;
 
-  my $re = $self->designator_regex;
+  my $re = $self->regex;
 
   if ($company_name =~ m/(.*?)\s*($re)\s*$/) {
     my $matched = $self->assembler->source($^R);
@@ -170,9 +170,16 @@ company designators appended to company names
   $bcd = Business::CompanyDesignator->new;
   $bcd = Business::CompanyDesignator->new(datafile => '/path/to/company_designator.yml');
 
+  # Accessors
+  # Get a regex for matching designators
+  $re = $bcd->regex;
+  $company_name =~ $re and say 'matches!';
+  $company_name =~ /$re\s*$/ and say 'matches!';
+
+  # Methods
   # Strip any trailing designator from $company_name
   $stripped_name = $bcd->strip_designator($company_name);
-  ($stripped_name, $designator) = $bcd->strip_designator($company_name);
+  ($stripped_name, $designator, $matched) = $bcd->strip_designator($company_name);
 
 
 =head1 DESCRIPTION

@@ -1,4 +1,7 @@
 ---
+Aktiebolag:
+  abbr: AB
+  lang: se
 Aktiengesellschaft:
   abbr: AG
   lang: de
