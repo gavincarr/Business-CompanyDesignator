@@ -142,34 +142,46 @@ sub _build_regex {
   return $self->assembler->re;
 }
 
-# Strip trailing designator from $company_name.
-# In scalar context returns the stripped name; in list context returns
-# a list containing ($stripped_name, $designator).
-sub strip_designator {
+# Split on (one) designator in $company_name, returning a ($before, $designator, $after)
+# triplet, plus the canonical form of the designator matched.
+sub split_designator {
   my $self = shift;
   my $company_name = shift;
   my $company_name_match = NFD($company_name);
 
   my $re = $self->regex;
 
-  if ($company_name_match =~ m/(.*?)\s*($re)\s*$/) {
+  # Designators are usually final, so try that first
+  if ($company_name_match =~ m/(.*?)\s+($re)\s*$/) {
+    my $before = $1;
+    my $des = $2;
     my $matched = $self->assembler->source($^R);
-    return wantarray ? (NFC($1), NFC($2), NFC($self->pattern_string_map->{$matched})) : NFC($1);
-#   my $long_designators = $self->pattern_long_map->{ $pattern_matched };
-#   my $match = Business::CompanyDesignator::Match->new(
-#     pattern           => $pattern_matched,
-#     long_designators  => $long_designators,
-#     languages         => [ map { $self->data->{$_}->{lang} } @$long_designators ],
-#   );
+    return (NFC($before), NFC($des), undef, NFC($self->pattern_string_map->{$matched}));
+  }
+  # Not final - check for embedded designator with trailing content
+  elsif ($company_name_match =~ m/(.*?)\s+($re)(?:\s+(.*?))?$/) {
+    my $before = $1;
+    my $des = $2;
+    my $after = NFC($3) if defined $3;
+    my $matched = $self->assembler->source($^R);
+    return (NFC($before), NFC($des), $after, NFC($self->pattern_string_map->{$matched}));
   }
   else {
-    return wantarray ? ($company_name) : $company_name;
+    return ($company_name, undef, undef, undef);
   }
 }
 
 1;
 
 __END__
+
+    # TODO
+    my $long_designators = $self->pattern_long_map->{ $pattern_matched };
+    my $match = Business::CompanyDesignator::Match->new(
+      pattern           => $pattern_matched,
+      long_designators  => $long_designators,
+      languages         => [ map { $self->data->{$_}->{lang} } @$long_designators ],
+    );
 
 =head1 NAME
 
@@ -187,13 +199,13 @@ company designators appended to company names
   # Accessors
   # Get a regex for matching designators
   $re = $bcd->regex;
-  $company_name =~ $re and say 'matches!';
-  $company_name =~ /$re\s*$/ and say 'matches!';
+  $company_name =~ $re and say 'has designator!';
+  $company_name =~ /$re\s*$/ and say 'has designator at end!';
 
   # Methods
-  # Strip any trailing designator from $company_name
-  $stripped_name = $bcd->strip_designator($company_name);
-  ($stripped_name, $designator, $matched) = $bcd->strip_designator($company_name);
+  # Split $company_name on designator, returning a ($before, $designator, $after) triplet,
+  # plus the canonical form of the designator matched
+  ($stripped_name, $designator, $trailing, $matched) = $bcd->split_designator($company_name);
 
 
 =head1 DESCRIPTION

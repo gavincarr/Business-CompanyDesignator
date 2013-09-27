@@ -8,7 +8,7 @@ use Test::More;
 use Business::CompanyDesignator;
 use Data::Dump qw(dd pp dump);
 
-# Data format: company_name, stripped_name, designator (stripped), designator (matched)
+# Data format: company_name, stripped_name, designator (stripped), designator (matched), after
 my @good = (
   # Check stripped vs. matched designators
   [ 'Open Fusion Pty Ltd'       => 'Open Fusion',               'Pty Ltd',      'Pty. Ltd.' ],
@@ -37,42 +37,40 @@ my @good = (
   # Handle random spaces between designator elements
   [ 'Verein Fuer Jugendfuersorge und Jugendpflege E. V.' =>
        'Verein Fuer Jugendfuersorge und Jugendpflege', 'E. V.', 'e.V.' ],
+  [ 'IT Solution Services Company Ltd' => 'IT Solution Services', 'Company Ltd', 'Company Ltd.' ],
+  [ 'Amerihealth Insurance Company of NJ', 'Amerihealth Insurance', 'Company', 'Company', 'of NJ' ],
+  [ 'True World Foods Inc of Hawaii', 'True World Foods', 'Inc', 'Inc.', 'of Hawaii' ],
+  [ 'Trenkwalder Personal AG Schweiz', 'Trenkwalder Personal', 'AG', 'AG', 'Schweiz' ],
+  [ 'Media Markt Tv-Hifi-Elektro GmbH Köln-Kalk', 'Media Markt Tv-Hifi-Elektro', 'GmbH', 'GmbH', 'Köln-Kalk' ],
 );
 my @bad = (
   # Check we are only matching literal dots
   'Open Fusion Pty1 Ltd2',
 );
 
-my ($bcd, $data, $strip, $des, $match);
+my ($bcd, $data);
 
 ok($bcd = Business::CompanyDesignator->new, 'constructor ok');
 ok($data = $bcd->data, 'data method ok');
 
 for my $t (@good) {
-  my ($company_name, $stripped_name, $designator, $matching) = @$t;
+  my ($company_name, $stripped_name, $designator, $matching, $after) = @$t;
 
-  # List context
-  ($strip, $des, $match) = $bcd->strip_designator($company_name);
+  my ($strip, $des, $trailing, $match) = $bcd->split_designator($company_name);
 
   is($strip, $stripped_name, "$company_name: stripped name ok: $strip");
   is($des,   $designator, "$company_name designator ok: " . ($des // 'undef'));
   is($match, $matching, "$company_name match ok: " . ($match // 'undef'));
-
-  # Scalar context
-  $strip = $bcd->strip_designator($company_name);
-  is($strip, $stripped_name, "$company_name: scalar stripped name ok: $strip");
+  if ($after || $trailing) {
+    is($trailing, $after, "$company_name trailing ok: " . ($trailing // 'undef'));
+  }
 }
 
 for my $company_name (@bad) {
-  # List context
-  ($strip, $des, $match) = $bcd->strip_designator($company_name);
+  my ($strip, $des, $after, $match) = $bcd->split_designator($company_name);
   is($strip, $company_name, "non-matching $company_name: stripped name is company name");
   is($des, undef, "non-matching $company_name: designator undef");
   is($match, undef, "non-matching $company_name: match undef");
-
-  # Scalar context
-  $strip = $bcd->strip_designator($company_name);
-  is($strip, $company_name, "non-matching $company_name: scalar stripped name is company name");
 }
 
 done_testing;
