@@ -66,8 +66,11 @@ sub _string_to_pattern {
   my ($self, $string) = @_;
   my $pattern = $string;
 
-  # Treat all periods as optional, and allow random whitespace between elements
-  $pattern =~ s/\./\\.?\\s*?/g;
+  # Periods are treated as optional literals, with optional trailing commas and/or whitespace
+  $pattern =~ s/\./\\.?,?\\s*?/g;
+
+  # Escape other regex metacharacters
+  $pattern =~ s/([()])/\\$1/g;
 
   # Record mapping in pattern_string_map
   $self->pattern_string_map->{$pattern} = $string;
@@ -128,12 +131,22 @@ sub _build_regex {
   # $self->assembler->add(@patterns);
   # Workaround by lexing and using insert()
   for my $string (@patterns) {
-    $self->assembler->insert(map { /\./ ? '\\.?\\s*?' : $_ } split //, $string);
+    $self->assembler->insert(map {
+      # Periods are treated as optional literals, with optional trailing commas and/or whitespace
+      /\./   ? '\\.?,?\\s*?' :
+      # Escape other regex metacharacters
+      /[()]/ ? "\\$_" : $_
+    } split //, $string);
     # Also add variants without unicode diacritics to catch misspellings
     if ($string =~ m/\pM/) {
       my $stripped_string = $string;
       $stripped_string =~ s/\pM//g;
-      $self->assembler->insert(map { /\./ ? '\\.?\\s*?' : $_ } split //, $stripped_string);
+      $self->assembler->insert(map {
+        # Periods are treated as optional literals, with optional trailing commas and/or whitespace
+        /\./   ? '\\.?,?\\s*?' :
+        # Escape other regex metacharacters
+        /[()]/ ? "\\$_" : $_
+      } split //, $stripped_string);
       # Add stripped_string to pattern_string_map
       $self->pattern_string_map->{$stripped_string} ||= $self->pattern_string_map->{$string};
     }
@@ -152,14 +165,14 @@ sub split_designator {
   my $re = $self->regex;
 
   # Designators are usually final, so try that first
-  if ($company_name_match =~ m/(.*?)\s+($re)\s*$/) {
+  if ($company_name_match =~ m/(.*?)[[:punct:]]*\s+($re)\s*$/) {
     my $before = $1;
     my $des = $2;
     my $matched = $self->assembler->source($^R);
     return (NFC($before), NFC($des), undef, NFC($self->pattern_string_map->{$matched}));
   }
   # Not final - check for embedded designator with trailing content
-  elsif ($company_name_match =~ m/(.*?)\s+($re)(?:\s+(.*?))?$/) {
+  elsif ($company_name_match =~ m/(.*?)[[:punct:]]*\s+($re)(?:\s+(.*?))?$/) {
     my $before = $1;
     my $des = $2;
     my $after = NFC($3) if defined $3;
