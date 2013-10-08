@@ -27,8 +27,12 @@ has 'datafile' => ( is => 'ro', default => sub {
 has [ qw(data assembler patterns regex) ]
   => ( is => 'ro', lazy_build => 1 );
 
-has 'pattern_long_map'   => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
+# pattern_string_map is a hash mapping patterns back to their source string,
+# since we do things like add additional patterns without diacritics
 has 'pattern_string_map' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
+# pattern_long_map is a hash mapping patterns back to one or more long designators,
+# so that we can map a pattern match back to its full entry/entries
+has 'pattern_long_map'   => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
 
 sub _build_data {
   my $self = shift;
@@ -155,6 +159,13 @@ sub _build_regex {
   return $self->assembler->re;
 }
 
+sub _split_designator_result {
+  my $self = shift;
+  my ($before, $des, $after, $matched) = @_;
+  my $matched_pattern = $self->pattern_string_map->{$matched};
+  return map { defined $_ ? NFC($_) : undef } ($before, $des, $after, $matched_pattern);
+}
+
 # Split on (one) designator in $company_name, returning a ($before, $designator, $after)
 # triplet, plus the canonical form of the designator matched.
 sub split_designator {
@@ -166,21 +177,15 @@ sub split_designator {
 
   # Designators are usually final, so try that first
   if ($company_name_match =~ m/(.*?)[[:punct:]]*\s+($re)\s*$/) {
-    my $before = $1;
-    my $des = $2;
-    my $matched = $self->assembler->source($^R);
-    return (NFC($before), NFC($des), undef, NFC($self->pattern_string_map->{$matched}));
+    return $self->_split_designator_result($1, $2, undef, $self->assembler->source($^R));
   }
-  # Not final - check for embedded designator with trailing content
+  # Not final - check for an embedded designator with trailing content
   elsif ($company_name_match =~ m/(.*?)[[:punct:]]*\s+($re)(?:\s+(.*?))?$/) {
-    my $before = $1;
-    my $des = $2;
-    my $after = NFC($3) if defined $3;
-    my $matched = $self->assembler->source($^R);
-    return (NFC($before), NFC($des), $after, NFC($self->pattern_string_map->{$matched}));
+    return $self->_split_designator_result($1, $2, $3, $self->assembler->source($^R));
   }
+  # No match - return $company_name unchanged
   else {
-    return ($company_name, undef, undef, undef);
+    return ($company_name);
   }
 }
 
@@ -207,9 +212,15 @@ company designators appended to company names
   
   # Constructor
   $bcd = Business::CompanyDesignator->new;
+  # Optionally, you can provide your own company_designator.yml file, instead of the bundled one
   $bcd = Business::CompanyDesignator->new(datafile => '/path/to/company_designator.yml');
 
   # Accessors
+  # Get lists of designators, which may be long (e.g. Limited) or abbreviations (e.g. Ltd.)
+  @des = $bcd->designators;
+  @long = $bcd->long_designators;
+  @abbrev = $bcd->abbreviations;
+
   # Get a regex for matching designators
   $re = $bcd->regex;
   $company_name =~ $re and say 'has designator!';
@@ -228,9 +239,14 @@ the typical company designators appended to company names. It supports both
 long forms (e.g. Corporation, Incorporated, Limited etc.) and abbreviations
 (e.g. Corp., Inc., Ltd., GmbH etc).
 
+Business::CompanyDesignator uses the company designator dataset from here:
+
+which is bundled with the module. You can use your own (updated or custom)
+version if you prefer, by passing a 'datafile' parameter to the constructor.
+
 =head1 AUTHOR
 
-Gavin Carr <gavin@openfusion.com.au>
+Gavin Carr <gavin@profound.net>
 
 =head1 COPYRIGHT AND LICENCE
 
