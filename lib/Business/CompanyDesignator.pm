@@ -89,12 +89,18 @@ sub record {
   return Business::CompanyDesignator::Record->new( long => $long, record => $entry );
 }
 
-# Return a list of B::CD::Records for $abbrev designator
-sub abbreviation_records {
-  my ($self, $abbrev) = @_;
-  my $long = $self->abbr_long_map->{$abbrev}
-    or croak "Invalid abbreviation '$abbrev'";
-  return map { $self->record($_) } @$long;
+# Return a list of B::CD::Records for $designator
+sub search_records {
+  my ($self, $designator) = @_;
+  if (my $long = $self->data->{$designator}) {
+    return ( $self->record($long) );
+  }
+  elsif (my $long_set = $self->abbr_long_map->{$designator}) {
+    return map { $self->record($_) } @$long_set
+  }
+  else {
+    croak "Invalid designator '$designator'";
+  }
 }
 
 # Convert a designator string into a pattern
@@ -266,7 +272,7 @@ Business::CompanyDesignator - module for matching and manipulating company desig
   # Lookup record by long designator (unique)
   $record = $bcd->record($long_designator);
   # Lookup records by abbreviation (non-unique)
-  @records = $bcd->abbreviation_records($abbreviation);
+  @records = $bcd->search_records($abbreviation);
 
 
 =head1 DESCRIPTION
