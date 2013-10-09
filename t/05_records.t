@@ -1,5 +1,7 @@
 #!perl
 
+# Test B::CD records() method
+
 use 5.010;
 use strict;
 use utf8;

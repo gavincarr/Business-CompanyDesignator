@@ -27,12 +27,16 @@ has 'datafile' => ( is => 'ro', default => sub {
   return dist_file('Business-CompanyDesignator', 'company_designator.yml');
 });
 
-has [ qw(data assembler patterns regex) ]
-  => ( is => 'ro', lazy_build => 1 );
+has [ qw(data assembler patterns regex) ] => ( is => 'ro', lazy_build => 1 );
+
+# abbr_long_map is a hash mapping abbreviations (strings) back to an arrayref of
+# long designators (since abbreviations are not necessarily unique)
+has 'abbr_long_map' => ( is => 'ro', isa => 'HashRef', lazy_build => 1 );
 
 # pattern_string_map is a hash mapping patterns back to their source string,
 # since we do things like add additional patterns without diacritics
 has 'pattern_string_map' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
+
 # pattern_long_map is a hash mapping patterns back to one or more long designators,
 # so that we can map a pattern match back to its full entry/entries
 has 'pattern_long_map'   => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
@@ -48,6 +52,20 @@ sub _build_assembler {
   Regexp::Assemble->new->flags('i')->track(1);
 }
 
+sub _build_abbr_long_map {
+  my $self = shift;
+  my $map = {};
+  while (my ($long, $entry) = each %{ $self->data }) {
+    my $abbr_list = $entry->{abbr} or next;
+    $abbr_list = [ $abbr_list ] if ! ref $abbr_list;
+    for my $abbr (@$abbr_list) {
+      $map->{$abbr} ||= [];
+      push @{ $map->{$abbr} }, $long;
+    }
+  }
+  return $map;
+}
+
 sub long_designators {
   my $self = shift;
   sort keys %{ $self->data };
@@ -55,12 +73,7 @@ sub long_designators {
 
 sub abbreviations {
   my $self = shift;
-  my @abbreviations;
-  for my $entry (values %{ $self->data }) {
-    next if ! $entry->{abbr};
-    push @abbreviations, ref $entry->{abbr} ? @{ $entry->{abbr} } : $entry->{abbr};
-  }
-  sort uniq @abbreviations;
+  sort keys %{ $self->abbr_long_map };
 }
 
 sub designators {
@@ -68,10 +81,20 @@ sub designators {
   sort $self->long_designators, $self->abbreviations;
 }
 
+# Return the B::CD::Record for $long designator
 sub record {
   my ($self, $long) = @_;
-  my $entry = $self->data->{$long} or croak "No record found for long designator '$long'";
+  my $entry = $self->data->{$long}
+    or croak "Invalid long designator '$long'";
   return Business::CompanyDesignator::Record->new( long => $long, record => $entry );
+}
+
+# Return a list of B::CD::Records for $abbrev designator
+sub abbreviation_records {
+  my ($self, $abbrev) = @_;
+  my $long = $self->abbr_long_map->{$abbrev}
+    or croak "Invalid abbreviation '$abbrev'";
+  return map { $self->record($_) } @$long;
 }
 
 # Convert a designator string into a pattern
@@ -210,18 +233,9 @@ sub split_designator {
 
 __END__
 
-    # TODO
-    my $long_designators = $self->pattern_long_map->{ $pattern_matched };
-    my $match = Business::CompanyDesignator::Match->new(
-      pattern           => $pattern_matched,
-      long_designators  => $long_designators,
-      languages         => [ map { $self->data->{$_}->{lang} } @$long_designators ],
-    );
-
 =head1 NAME
 
-Business::CompanyDesignator - perl module for matching and manipulating
-company designators appended to company names
+Business::CompanyDesignator - module for matching and manipulating company designators appended to company names
 
 =head1 SYNOPSIS
 
@@ -240,13 +254,19 @@ company designators appended to company names
 
   # Get a regex for matching designators
   $re = $bcd->regex;
-  $company_name =~ $re and say 'has designator!';
-  $company_name =~ /$re\s*$/ and say 'has designator at end!';
+  $company_name =~ $re and say 'designator found!';
+  $company_name =~ /$re\s*$/ and say 'final designator found!';
 
   # Methods
   # Split $company_name on designator, returning a ($before, $designator, $after) triplet,
-  # plus the canonical form of the designator matched
-  ($stripped_name, $designator, $trailing, $matched) = $bcd->split_designator($company_name);
+  # plus the normalised form of the designator matched
+  ($short_name, $des, $after, $normalised_des) = $bcd->split_designator($company_name);
+
+  # Access designator records (returns Business::CompanyDesignator::Record objects)
+  # Lookup record by long designator (unique)
+  $record = $bcd->record($long_designator);
+  # Lookup records by abbreviation (non-unique)
+  @records = $bcd->abbreviation_records($abbreviation);
 
 
 =head1 DESCRIPTION
@@ -267,7 +287,7 @@ Gavin Carr <gavin@profound.net>
 
 =head1 COPYRIGHT AND LICENCE
 
-Copyright (C) Gavin Carr 2013.
+Copyright (C) Gavin Carr and Profound Networks 2013.
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself, either Perl version 5.10.0 or, at
