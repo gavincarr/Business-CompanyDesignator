@@ -9,8 +9,8 @@ t/00_load.t
 t/01_data.t
 t/02_designators.t
 t/05_records.t
+t/06_records.t
 t/10_split_designator.t
-t/10_strip_designator.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t

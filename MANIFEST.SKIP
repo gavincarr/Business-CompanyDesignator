@@ -3,6 +3,7 @@
 \.gitignore
 ^blib\b
 ^CompanyDesignator.pm$
+^Record.pm$
 EXCLUDE
 ^inc\b
 Makefile

@@ -101,7 +101,7 @@ sub records {
 }
 
 # Add $string to regex assembler
-sub add_to_assembler {
+sub _add_to_assembler {
   my ($self, $string, $reference_string) = @_;
   $reference_string ||= $string;
 
@@ -125,7 +125,7 @@ sub add_to_assembler {
   if ($string =~ m/\pM/) {
     my $stripped = $string;
     $stripped =~ s/\pM//g;
-    $self->add_to_assembler($stripped, $string);
+    $self->_add_to_assembler($stripped, $string);
   }
 }
 
@@ -135,14 +135,14 @@ sub _build_regex {
 
   while (my ($long, $entry) = each %{ $self->data }) {
     $long = NFD $long;
-    $self->add_to_assembler($long);
+    $self->_add_to_assembler($long);
 
     # Add all abbreviations
     if (my $abbr_list = $entry->{abbr}) {
       $abbr_list = [ $abbr_list ] if ! ref $abbr_list;
       for my $abbr (@$abbr_list) {
         $abbr = NFD($abbr);
-        $self->add_to_assembler($abbr);
+        $self->_add_to_assembler($abbr);
       }
     }
   }
@@ -194,6 +194,14 @@ __END__
 
 Business::CompanyDesignator - module for matching and manipulating company designators appended to company names
 
+=head1 VERSION
+
+Version: 0.02.
+
+This module is considered an B<ALPHA> release. Interfaces may change and/or break
+without notice until the module reaches version 1.0.
+
+
 =head1 SYNOPSIS
 
 Business::CompanyDesignator is a perl module for matching and manipulating
@@ -227,14 +235,6 @@ long forms (e.g. Corporation, Incorporated, Limited etc.) and abbreviations
   # Split $company_name on designator, returning a ($before, $designator, $after) triplet,
   # plus the normalised form of the designator matched.
   ($short_name, $des, $after, $normalised_des) = $bcd->split_designator($company_name);
-
-
-=head1 STATUS
-
-Version: 0.02.
-
-This module is considered an B<ALPHA> release. Interfaces may change and/or break
-without notice until it reaches version 1.0.
 
 
 =head1 DATASET
@@ -342,7 +342,7 @@ Gavin Carr <gavin@profound.net>
 
 =head1 COPYRIGHT AND LICENCE
 
-Copyright (C) Gavin Carr and Profound Networks 2013.
+Copyright (C) 2013 Gavin Carr and Profound Networks.
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

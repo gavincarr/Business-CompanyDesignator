@@ -1,5 +1,5 @@
 ---
-abstract: 'perl module for matching and manipulating'
+abstract: 'module for matching and manipulating company designators appended to company names'
 author:
   - 'Gavin Carr <gavin@profound.net>'
 build_requires:
