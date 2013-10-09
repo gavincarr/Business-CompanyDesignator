@@ -1,6 +1,6 @@
 #!perl
 
-# Test B::CD search_records() method
+# Test B::CD records() method
 
 use 5.010;
 use strict;
@@ -18,7 +18,7 @@ ok($bcd = Business::CompanyDesignator->new, 'constructor ok');
 # Test searching via abbreviations
 ok(@abbrev = $bcd->abbreviations, 'abbreviations method ok, found ' . scalar(@abbrev));
 for my $abbrev (@abbrev) {
-  ok(@records = $bcd->search_records($abbrev), "records found for abbrev '$abbrev': " . scalar(@records));
+  ok(@records = $bcd->records($abbrev), "records found for abbrev '$abbrev': " . scalar(@records));
   for my $record (@records) {
     ok(ref $record && $record->isa('Business::CompanyDesignator::Record'),
       'record isa Business::CompanyDesignator::Record');
@@ -36,7 +36,7 @@ for my $abbrev (@abbrev) {
 # Test searching via longs
 ok(@long = $bcd->long_designators, 'long_designators method ok, found ' . scalar(@long));
 for my $long (@long) {
-  ok(@records = $bcd->search_records($long), "records found for long '$long': " . scalar(@records));
+  ok(@records = $bcd->records($long), "records found for long '$long': " . scalar(@records));
   for my $record (@records) {
     ok(ref $record && $record->isa('Business::CompanyDesignator::Record'), 'record isa Business::CompanyDesignator::Record');
     is($record->long, $long, "\$record->long is '$long'");
@@ -49,7 +49,7 @@ for my $long (@long) {
   }
 }
 
-dies_ok { $bcd->search_records('Bogus') } 'search_records() dies on bogus designator';
+dies_ok { $bcd->records('Bogus') } 'records() dies on bogus designator';
 
 done_testing;
 

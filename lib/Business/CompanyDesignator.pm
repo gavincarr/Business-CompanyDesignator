@@ -86,7 +86,7 @@ sub record {
 }
 
 # Return a list of B::CD::Records for $designator
-sub search_records {
+sub records {
   my ($self, $designator) = @_;
   if (exists $self->data->{$designator}) {
     return ( $self->record($designator) );
@@ -221,8 +221,8 @@ Business::CompanyDesignator - module for matching and manipulating company desig
   # Access designator records (returns Business::CompanyDesignator::Record objects)
   # Lookup record by long designator (unique)
   $record = $bcd->record($long_designator);
-  # Lookup records by abbreviation (non-unique)
-  @records = $bcd->search_records($abbreviation);
+  # Lookup records by abbreviation or long designator (may not be unique)
+  @records = $bcd->records($designator);
 
 
 =head1 DESCRIPTION

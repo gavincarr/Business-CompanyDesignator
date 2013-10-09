@@ -36,17 +36,16 @@ for my $t (@$good) {
     is($trailing, $after, "$company_name trailing ok: " . ($trailing // 'undef'));
   }
 
-  my @records = $bcd->search_records($normalised_des);
-  ok(scalar @records, 'search_records returned ' . scalar(@records) . ' record(s): '
+  my @records = $bcd->records($normalised_des);
+  ok(scalar @records, 'records returned ' . scalar(@records) . ' record(s): '
     . join(',', map { $_->long } @records));
 }
 
 for my $company_name (@bad) {
-  my ($strip, $des, $after, $normalised_des, $des_entries) = $bcd->split_designator($company_name);
+  my ($strip, $des, $after, $normalised_des) = $bcd->split_designator($company_name);
   is($strip, $company_name, "non-matching $company_name: stripped name is company name");
   is($des, undef, "non-matching $company_name: designator undef");
   is($normalised_des, undef, "non-matching $company_name: normalised_des undef");
-  is($des_entries, undef, "non-matching $company_name: des_entries undef");
 }
 
 done_testing;
