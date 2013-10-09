@@ -27,7 +27,7 @@ has 'datafile' => ( is => 'ro', default => sub {
   return dist_file('Business-CompanyDesignator', 'company_designator.yml');
 });
 
-has [ qw(data assembler patterns regex) ] => ( is => 'ro', lazy_build => 1 );
+has [ qw(data assembler regex) ] => ( is => 'ro', lazy_build => 1 );
 
 # abbr_long_map is a hash mapping abbreviations (strings) back to an arrayref of
 # long designators (since abbreviations are not necessarily unique)
@@ -99,83 +99,50 @@ sub search_records {
   }
 }
 
-# Convert a designator string into a pattern
-sub _string_to_pattern {
-  my ($self, $string, $long_designator) = @_;
-  croak "_string_to_pattern is missing $long_designator" unless $long_designator;
+# Add $string to regex assembler
+sub add_to_assembler {
+  my ($self, $string, $reference_string) = @_;
+  $reference_string ||= $string;
 
-  my $pattern = $string;
+  # FIXME: RA->add() doesn't work here because of known quantifier-escaping bugs:
+  # https://rt.cpan.org/Public/Bug/Display.html?id=50228
+  # https://rt.cpan.org/Public/Bug/Display.html?id=74449
+  # $self->assembler->add($string)
+  # Workaround by lexing and using insert()
+  my @pattern = map {
+    # Periods are treated as optional literals, with optional trailing commas and/or whitespace
+    /\./   ? '\\.?,?\\s*?' :
+    # Escape other regex metacharacters
+    /[()]/ ? "\\$_" : $_
+  } split //, $string;
+  $self->assembler->insert(@pattern);
 
-  # Periods are treated as optional literals, with optional trailing commas and/or whitespace
-  $pattern =~ s/\./\\.?,?\\s*?/g;
+  # Also add pattern => $string mapping to pattern_string_map
+  $self->pattern_string_map->{ join '', @pattern } = $reference_string;
 
-  # Escape other regex metacharacters
-  $pattern =~ s/([()])/\\$1/g;
-
-  # Record mapping in pattern_string_map
-  $self->pattern_string_map->{$pattern} = $string;
-
-  return $pattern;
-}
-
-# patterns is an ordered arrayref of patterns derived from designator strings
-# Collating also builds a pattern_string_map of pattern => source string
-sub _build_patterns {
-  my $self = shift;
-
-  # Build patterns list and patterns map
-  my (@pattern_long, @pattern_abbr);
-  while (my ($long_designator, $entry) = each %{ $self->data }) {
-    $long_designator = NFD($long_designator);
-    # Add long_designator patterns
-    push @pattern_long, $long_designator;
-    my $pattern = $self->_string_to_pattern($long_designator, $long_designator);
-
-    # Add all abbreviations
-    if (my $abbr_list = $entry->{abbr}) {
-      $abbr_list = [ $abbr_list ] if ! ref $abbr_list;
-      for my $abbr (@$abbr_list) {
-        $abbr = NFD($abbr);
-        push @pattern_abbr, $abbr;
-        $pattern = $self->_string_to_pattern($abbr, $long_designator);
-      }
-    }
+  # If $string contains unicode diacritics, also add a version without them for misspellings 
+  if ($string =~ m/\pM/) {
+    my $stripped = $string;
+    $stripped =~ s/\pM//g;
+    $self->add_to_assembler($stripped, $string);
   }
-
-  return [ @pattern_long, @pattern_abbr ];
 }
 
 # Assemble designator regex
 sub _build_regex {
   my $self = shift;
 
-  my @patterns = @{ $self->patterns };
+  while (my ($long, $entry) = each %{ $self->data }) {
+    $long = NFD $long;
+    $self->add_to_assembler($long);
 
-  # FIXME: RA->add() doesn't work here because of known quantifier-escaping bugs:
-  # https://rt.cpan.org/Public/Bug/Display.html?id=50228
-  # https://rt.cpan.org/Public/Bug/Display.html?id=74449
-  # $self->assembler->add(@patterns);
-  # Workaround by lexing and using insert()
-  for my $pattern (@patterns) {
-    $self->assembler->insert(map {
-      # Periods are treated as optional literals, with optional trailing commas and/or whitespace
-      /\./   ? '\\.?,?\\s*?' :
-      # Escape other regex metacharacters
-      /[()]/ ? "\\$_" : $_
-    } split //, $pattern);
-    # Also add variants without unicode diacritics to catch misspellings
-    if ($pattern =~ m/\pM/) {
-      my $stripped_pattern = $pattern;
-      $stripped_pattern =~ s/\pM//g;
-      $self->assembler->insert(map {
-        # Periods are treated as optional literals, with optional trailing commas and/or whitespace
-        /\./   ? '\\.?,?\\s*?' :
-        # Escape other regex metacharacters
-        /[()]/ ? "\\$_" : $_
-      } split //, $stripped_pattern);
-
-      # Add stripped_pattern to pattern_string_map
-      $self->pattern_string_map->{$stripped_pattern} ||= $self->pattern_string_map->{$pattern};
+    # Add all abbreviations
+    if (my $abbr_list = $entry->{abbr}) {
+      $abbr_list = [ $abbr_list ] if ! ref $abbr_list;
+      for my $abbr (@$abbr_list) {
+        $abbr = NFD($abbr);
+        $self->add_to_assembler($abbr);
+      }
     }
   }
 
