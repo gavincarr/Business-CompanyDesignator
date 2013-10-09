@@ -27,21 +27,23 @@ ok($data = $bcd->data, 'data method ok');
 for my $t (@$good) {
   my ($company_name, $stripped_name, $designator, $matching, $after) = @$t;
 
-  my ($strip, $des, $trailing, $match) = $bcd->split_designator($company_name);
+  my ($strip, $des, $trailing, $normalised_des, $des_entries) = $bcd->split_designator($company_name);
 
   is($strip, $stripped_name, "$company_name: stripped name ok: $strip");
   is($des,   $designator, "$company_name designator ok: " . ($des // 'undef'));
-  is($match, $matching, "$company_name match ok: " . ($match // 'undef'));
+  is($normalised_des, $matching, "$company_name normalised_des ok: " . ($normalised_des // 'undef'));
   if ($after || $trailing) {
     is($trailing, $after, "$company_name trailing ok: " . ($trailing // 'undef'));
   }
+  ok($des_entries, 'des_entries set: ' . join(',', map { $_->long } @$des_entries));
 }
 
 for my $company_name (@bad) {
-  my ($strip, $des, $after, $match) = $bcd->split_designator($company_name);
+  my ($strip, $des, $after, $normalised_des, $des_entries) = $bcd->split_designator($company_name);
   is($strip, $company_name, "non-matching $company_name: stripped name is company name");
   is($des, undef, "non-matching $company_name: designator undef");
-  is($match, undef, "non-matching $company_name: match undef");
+  is($normalised_des, undef, "non-matching $company_name: normalised_des undef");
+  is($des_entries, undef, "non-matching $company_name: des_entries undef");
 }
 
 done_testing;

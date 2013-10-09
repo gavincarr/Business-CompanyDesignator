@@ -3,16 +3,19 @@ package Business::CompanyDesignator;
 # Require perl 5.010 because the 'track' functionality of Regexp::Assemble
 # is unsafe for earlier versions.
 use 5.010;
-use warnings qw(FATAL utf8);
 use Mouse;
+use warnings qw(FATAL utf8);
 use FindBin qw($Bin);
 use YAML;
 use File::ShareDir qw(dist_file);
 use List::MoreUtils qw(uniq);
 use Regexp::Assemble;
 use Unicode::Normalize;
+use Carp;
 
-our $VERSION = '0.01';
+use Business::CompanyDesignator::Record;
+
+our $VERSION = '0.02';
 
 has 'datafile' => ( is => 'ro', default => sub {
   # Development/test version
@@ -65,9 +68,17 @@ sub designators {
   sort $self->long_designators, $self->abbreviations;
 }
 
+sub record {
+  my ($self, $long) = @_;
+  my $entry = $self->data->{$long} or croak "No record found for long designator '$long'";
+  return Business::CompanyDesignator::Record->new( long => $long, record => $entry );
+}
+
 # Convert a designator string into a pattern
 sub _string_to_pattern {
-  my ($self, $string) = @_;
+  my ($self, $string, $long_designator) = @_;
+  croak "_string_to_pattern is missing $long_designator" unless $long_designator;
+
   my $pattern = $string;
 
   # Periods are treated as optional literals, with optional trailing commas and/or whitespace
@@ -79,13 +90,11 @@ sub _string_to_pattern {
   # Record mapping in pattern_string_map
   $self->pattern_string_map->{$pattern} = $string;
 
-  return $pattern;
-}
-
-sub _add_to_pattern_long_map {
-  my ($self, $pattern, $value) = @_;
+  # Record mapping in pattern_long_map
   $self->pattern_long_map->{ $pattern } ||= [];
-  push @{ $self->pattern_long_map->{ $pattern } }, $value;
+  push @{ $self->pattern_long_map->{ $pattern } }, $long_designator;
+
+  return $pattern;
 }
 
 # patterns is an ordered arrayref of patterns derived from designator strings
@@ -100,9 +109,7 @@ sub _build_patterns {
     $long_designator = NFD($long_designator);
     # Add long_designator patterns
     push @pattern_long, $long_designator;
-    my $pattern = $self->_string_to_pattern($long_designator);
-#   push @pattern_long, $pattern;
-    $self->_add_to_pattern_long_map($pattern => $long_designator);
+    my $pattern = $self->_string_to_pattern($long_designator, $long_designator);
 
     # Add all abbreviations
     if (my $abbr_list = $entry->{abbr}) {
@@ -110,16 +117,11 @@ sub _build_patterns {
       for my $abbr (@$abbr_list) {
         $abbr = NFD($abbr);
         push @pattern_abbr, $abbr;
-        $pattern = $self->_string_to_pattern($abbr);
-#       push @pattern_abbr, $pattern;
-        $self->_add_to_pattern_long_map($pattern => $long_designator);
+        $pattern = $self->_string_to_pattern($abbr, $long_designator);
       }
     }
   }
 
-  # FIXME: do we need to sort these patterns??
-  # sort({ length $a <=> length $b } @pattern_long)
-  # sort({ length $a <=> length $b } @pattern_abbr)
   return [ @pattern_long, @pattern_abbr ];
 }
 
@@ -134,40 +136,55 @@ sub _build_regex {
   # https://rt.cpan.org/Public/Bug/Display.html?id=74449
   # $self->assembler->add(@patterns);
   # Workaround by lexing and using insert()
-  for my $string (@patterns) {
+  for my $pattern (@patterns) {
     $self->assembler->insert(map {
       # Periods are treated as optional literals, with optional trailing commas and/or whitespace
       /\./   ? '\\.?,?\\s*?' :
       # Escape other regex metacharacters
       /[()]/ ? "\\$_" : $_
-    } split //, $string);
+    } split //, $pattern);
     # Also add variants without unicode diacritics to catch misspellings
-    if ($string =~ m/\pM/) {
-      my $stripped_string = $string;
-      $stripped_string =~ s/\pM//g;
+    if ($pattern =~ m/\pM/) {
+      my $stripped_pattern = $pattern;
+      $stripped_pattern =~ s/\pM//g;
       $self->assembler->insert(map {
         # Periods are treated as optional literals, with optional trailing commas and/or whitespace
         /\./   ? '\\.?,?\\s*?' :
         # Escape other regex metacharacters
         /[()]/ ? "\\$_" : $_
-      } split //, $stripped_string);
-      # Add stripped_string to pattern_string_map
-      $self->pattern_string_map->{$stripped_string} ||= $self->pattern_string_map->{$string};
+      } split //, $stripped_pattern);
+
+      # Add stripped_pattern to pattern_string_map and pattern_long_map
+      $self->pattern_string_map->{$stripped_pattern} ||= $self->pattern_string_map->{$pattern};
+      $self->pattern_long_map->{$stripped_pattern}   ||= $self->pattern_long_map->{$pattern};
     }
   }
 
   return $self->assembler->re;
 }
 
+# Helper to return split_designator results
 sub _split_designator_result {
   my $self = shift;
-  my ($before, $des, $after, $matched) = @_;
-  my $matched_pattern = $self->pattern_string_map->{$matched};
-  return map { defined $_ ? NFC($_) : undef } ($before, $des, $after, $matched_pattern);
+  my ($before, $des, $after, $matched_pattern) = @_;
+  my $matched_string = $self->pattern_string_map->{$matched_pattern}
+    or die "Cannot find matched pattern '$matched_pattern' in pattern_string_map";
+  my $matched_long_list = $self->pattern_long_map->{$matched_pattern}
+    or die "Cannot find matched pattern '$matched_pattern' in pattern_long_map";
+  my @entries;
+  for my $matched_long (@$matched_long_list) {
+    $matched_long = NFC($matched_long);
+    push @entries, $self->record($matched_long);
+  }
+  return map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($before, $des, $after, $matched_string, \@entries);
 }
 
 # Split on (one) designator in $company_name, returning a ($before, $designator, $after)
-# triplet, plus the canonical form of the designator matched.
+# triplet, plus the normalised form of the designator matched and an arrayref of full
+# designator entries matched
+# e.g. matching "ABC Pty" Ltd would return "Pty Ltd" for $designator, but "Pty. Ltd." for
+# the normalised form, and "Accessoires XYZ Ltee" would return "Ltee" for $designator,
+# but "Ltée" for the normalised form
 sub split_designator {
   my $self = shift;
   my $company_name = shift;
