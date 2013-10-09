@@ -92,8 +92,8 @@ sub record {
 # Return a list of B::CD::Records for $designator
 sub search_records {
   my ($self, $designator) = @_;
-  if (my $long = $self->data->{$designator}) {
-    return ( $self->record($long) );
+  if (exists $self->data->{$designator}) {
+    return ( $self->record($designator) );
   }
   elsif (my $long_set = $self->abbr_long_map->{$designator}) {
     return map { $self->record($_) } @$long_set

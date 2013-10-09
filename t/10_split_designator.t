@@ -27,7 +27,7 @@ ok($data = $bcd->data, 'data method ok');
 for my $t (@$good) {
   my ($company_name, $stripped_name, $designator, $matching, $after) = @$t;
 
-  my ($strip, $des, $trailing, $normalised_des, $des_entries) = $bcd->split_designator($company_name);
+  my ($strip, $des, $trailing, $normalised_des) = $bcd->split_designator($company_name);
 
   is($strip, $stripped_name, "$company_name: stripped name ok: $strip");
   is($des,   $designator, "$company_name designator ok: " . ($des // 'undef'));
@@ -35,7 +35,10 @@ for my $t (@$good) {
   if ($after || $trailing) {
     is($trailing, $after, "$company_name trailing ok: " . ($trailing // 'undef'));
   }
-  ok($des_entries, 'des_entries set: ' . join(',', map { $_->long } @$des_entries));
+
+  my @records = $bcd->search_records($normalised_des);
+  ok(scalar @records, 'search_records returned ' . scalar(@records) . ' record(s): '
+    . join(',', map { $_->long } @records));
 }
 
 for my $company_name (@bad) {
