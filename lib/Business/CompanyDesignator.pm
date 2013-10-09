@@ -37,10 +37,6 @@ has 'abbr_long_map' => ( is => 'ro', isa => 'HashRef', lazy_build => 1 );
 # since we do things like add additional patterns without diacritics
 has 'pattern_string_map' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
 
-# pattern_long_map is a hash mapping patterns back to one or more long designators,
-# so that we can map a pattern match back to its full entry/entries
-has 'pattern_long_map'   => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
-
 sub _build_data {
   my $self = shift;
   YAML::LoadFile($self->datafile);
@@ -119,16 +115,11 @@ sub _string_to_pattern {
   # Record mapping in pattern_string_map
   $self->pattern_string_map->{$pattern} = $string;
 
-  # Record mapping in pattern_long_map
-  $self->pattern_long_map->{ $pattern } ||= [];
-  push @{ $self->pattern_long_map->{ $pattern } }, $long_designator;
-
   return $pattern;
 }
 
 # patterns is an ordered arrayref of patterns derived from designator strings
-# Collating also builds a pattern_long_map of pattern => long_designator, and
-# a pattern_string_map of pattern => source string
+# Collating also builds a pattern_string_map of pattern => source string
 sub _build_patterns {
   my $self = shift;
 
@@ -183,9 +174,8 @@ sub _build_regex {
         /[()]/ ? "\\$_" : $_
       } split //, $stripped_pattern);
 
-      # Add stripped_pattern to pattern_string_map and pattern_long_map
+      # Add stripped_pattern to pattern_string_map
       $self->pattern_string_map->{$stripped_pattern} ||= $self->pattern_string_map->{$pattern};
-      $self->pattern_long_map->{$stripped_pattern}   ||= $self->pattern_long_map->{$pattern};
     }
   }
 
@@ -198,19 +188,12 @@ sub _split_designator_result {
   my ($before, $des, $after, $matched_pattern) = @_;
   my $matched_string = $self->pattern_string_map->{$matched_pattern}
     or die "Cannot find matched pattern '$matched_pattern' in pattern_string_map";
-  my $matched_long_list = $self->pattern_long_map->{$matched_pattern}
-    or die "Cannot find matched pattern '$matched_pattern' in pattern_long_map";
-  my @entries;
-  for my $matched_long (@$matched_long_list) {
-    $matched_long = NFC($matched_long);
-    push @entries, $self->record($matched_long);
-  }
-  return map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($before, $des, $after, $matched_string, \@entries);
+  return map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($before, $des, $after, $matched_string);
 }
 
-# Split on (one) designator in $company_name, returning a ($before, $designator, $after)
-# triplet, plus the normalised form of the designator matched and an arrayref of full
-# designator entries matched
+# Split $company_name on (the first) company designator, returning a triplet of strings:
+# ($before, $designator, $after), plus the normalised form of the designator. If no
+# designator is found, just returns ($company_name).
 # e.g. matching "ABC Pty" Ltd would return "Pty Ltd" for $designator, but "Pty. Ltd." for
 # the normalised form, and "Accessoires XYZ Ltee" would return "Ltee" for $designator,
 # but "Ltée" for the normalised form
