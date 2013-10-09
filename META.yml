@@ -1,11 +1,11 @@
 ---
 abstract: 'perl module for matching and manipulating'
 author:
-  - 'Gavin Carr <gavin@openfusion.com.au>'
-  - 'Gavin Carr <gavin@openfusion.com.au>'
+  - 'Gavin Carr <gavin@profound.net>'
 build_requires:
   ExtUtils::MakeMaker: 6.59
-  Test::More: 0
+  Test::Exception: 0
+  Test::More: 0.88
 configure_requires:
   ExtUtils::MakeMaker: 6.59
 distribution_type: module
@@ -30,4 +30,4 @@ requires:
   perl: 5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.01
+version: 0.02
