@@ -24,10 +24,11 @@ for my $abbrev (@abbrev) {
       'record isa Business::CompanyDesignator::Record');
     my $long = $record->long;
     ok($long && ! ref $long, "long is string: " . $long);
-    my $abbr = $record->abbr;
-    ok($abbrev ~~ @$abbr, "abbrev $abbrev included in '$long' abbreviations");
-    my $abbr1 = $record->abbr1;
-    ok(! defined $abbr1 || ! ref $abbr1, "abbr1 is string (or undef): " . $abbr1||'undef');
+    my @abbr = $record->abbr;
+    ok($abbrev ~~ @abbr, "abbrev $abbrev included in '$long' abbreviations");
+    if (my $abbr1 = $record->abbr1) {
+      ok(! ref $abbr1, "abbr1 is string: " . $abbr1);
+    }
     my $lang = $record->lang;
     ok($lang && ! ref $lang, "lang is string: " . $lang);
   }
@@ -40,10 +41,15 @@ for my $long (@long) {
   for my $record (@records) {
     ok(ref $record && $record->isa('Business::CompanyDesignator::Record'), 'record isa Business::CompanyDesignator::Record');
     is($record->long, $long, "\$record->long is '$long'");
-    my $abbr = $record->abbr;
-    ok(! defined $abbr || ref $abbr eq 'ARRAY', "abbr is arrayref (or undef): " . (defined $abbr ? @$abbr : 'undef'));
-    my $abbr1 = $record->abbr1;
-    ok(! defined $abbr1 || ! ref $abbr1, "abbr1 is string (or undef): " . $abbr1||'undef');
+    if (my @abbr = $record->abbr) {
+      ok(@abbr, "abbr is array: " . join(',', @abbr));
+    }
+    if (my @abbr = $record->abbr) {
+      ok(@abbr, "abbr is array: " . join(',', @abbr));
+    }
+    if (my $abbr1 = $record->abbr1) {
+      ok(! ref $abbr1, "abbr1 is string: " . $abbr1);
+    }
     my $lang = $record->lang;
     ok($lang && ! ref $lang, "lang is string: " . $lang);
   }
