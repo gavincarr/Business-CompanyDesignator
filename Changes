@@ -1,25 +1,28 @@
-ChangeLog
----------
+Revision history for perl module Business::CompanyDesignator
 
-v0.3
-* Fix bad race condition where abbr_long_map aliases could get NFDed.
-* Add missing dependencies to Makefile.PL.
+0.3   2013-10-15
 
-v0.2
-* Fill out perldocs in B::CD and B::CD::Record.
-* Refactor and simplify regex assembly code.
-* Add Business::CompanyDesignator->record() and records() methods.
-* Add Business::CompanyDesignator::Record and unit tests.
-* Refactor split_designator, pulling out shared _split_designator_result.
+    * Fix bad race condition where abbr_long_map aliases could get NFDed.
+    * Add missing dependencies to Makefile.PL.
+    * Make Changes file CPAN::Changes::Spec-compatible.
 
-v0.1
-* Allow optional trailing commas after periods, and escape () properly.
-* Change strip_designator to split_designator, handle capturing trailing content.
-* Update to allow random whitespace after periods in designators.
-* Add regexp variants without unicode diacritics to catch misspellings.
-* Add Unicode::Normalize magic to Business::CompanyDesignator.
-* Add install_share to Makefile.PL; make regex comparisons case-insensitive.
-* Rename designator_regex() to regex(); add test data to t/10_strip_designator.t.
-* Add pattern maps, workaround Regexp::Assemble quantifier bugs.
-* Initial import.
+0.2   2013-10-09
+
+    * Fill out perldocs in B::CD and B::CD::Record.
+    * Refactor and simplify regex assembly code.
+    * Add Business::CompanyDesignator->record() and records() methods.
+    * Add Business::CompanyDesignator::Record and unit tests.
+    * Refactor split_designator, pulling out shared _split_designator_result.
+
+0.1   2013-09-28
+
+    * Allow optional trailing commas after periods, and escape () properly.
+    * Change strip_designator to split_designator, handle capturing trailing content.
+    * Update to allow random whitespace after periods in designators.
+    * Add regexp variants without unicode diacritics to catch misspellings.
+    * Add Unicode::Normalize magic to Business::CompanyDesignator.
+    * Add install_share to Makefile.PL; make regex comparisons case-insensitive.
+    * Rename designator_regex() to regex(); add test data to t/10_strip_designator.t.
+    * Add pattern maps, workaround Regexp::Assemble quantifier bugs.
+    * Initial import.
 
