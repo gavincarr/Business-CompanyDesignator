@@ -1,6 +1,10 @@
 ChangeLog
 ---------
 
+v0.3
+* Fix bad race condition where abbr_long_map aliases could get NFDed.
+* Add missing dependencies to Makefile.PL.
+
 v0.2
 * Fill out perldocs in B::CD and B::CD::Record.
 * Refactor and simplify regex assembly code.

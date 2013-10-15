@@ -3,6 +3,7 @@ abstract: 'module for matching and manipulating company designators appended to 
 author:
   - 'Gavin Carr <gavin@profound.net>'
 build_requires:
+  Data::Dump: 0
   ExtUtils::MakeMaker: 6.59
   Test::Exception: 0
   Test::More: 0.88
@@ -25,9 +26,12 @@ requires:
   File::ShareDir: 0
   List::MoreUtils: 0
   Mouse: 0
+  MouseX::NativeTraits: 0
   Regexp::Assemble: 0
   Unicode::Normalize: 0
+  YAML: 0
+  namespace::autoclean: 0
   perl: 5.10.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.02
+version: 0.03
