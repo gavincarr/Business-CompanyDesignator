@@ -6,9 +6,11 @@ license  'perl';
 
 build_requires 'Test::More';
 
-requires 'Mouse';
 requires 'File::ShareDir';
 requires 'List::MoreUtils';
+requires 'Mouse';
+requires 'MouseX::NativeTraits';
+requires 'namespace::autoclean';
 requires 'Regexp::Assemble';
 requires 'Unicode::Normalize';
 
