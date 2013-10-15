@@ -16,7 +16,7 @@ use Carp;
 
 use Business::CompanyDesignator::Record;
 
-our $VERSION = '0.02';
+our $VERSION = '0.03';
 
 has 'datafile' => ( is => 'ro', default => sub {
   # Development/test version
@@ -134,15 +134,15 @@ sub _build_regex {
   my $self = shift;
 
   while (my ($long, $entry) = each %{ $self->data }) {
-    $long = NFD $long;
-    $self->_add_to_assembler($long);
+    my $long_nfd = NFD($long);
+    $self->_add_to_assembler($long_nfd);
 
     # Add all abbreviations
     if (my $abbr_list = $entry->{abbr}) {
       $abbr_list = [ $abbr_list ] if ! ref $abbr_list;
       for my $abbr (@$abbr_list) {
-        $abbr = NFD($abbr);
-        $self->_add_to_assembler($abbr);
+        my $abbr_nfd = NFD($abbr);
+        $self->_add_to_assembler($abbr_nfd);
       }
     }
   }
