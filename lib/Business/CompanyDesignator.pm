@@ -192,11 +192,12 @@ __END__
 
 =head1 NAME
 
-Business::CompanyDesignator - module for matching and manipulating company designators appended to company names
+Business::CompanyDesignator - module for matching and stripping/manipulating the
+company designators appended to company names
 
 =head1 VERSION
 
-Version: 0.02.
+Version: 0.03.
 
 This module is considered an B<ALPHA> release. Interfaces may change and/or break
 without notice until the module reaches version 1.0.
@@ -204,7 +205,7 @@ without notice until the module reaches version 1.0.
 
 =head1 SYNOPSIS
 
-Business::CompanyDesignator is a perl module for matching and manipulating
+Business::CompanyDesignator is a perl module for matching and stripping/manipulating
 the typical company designators appended to company names. It supports both
 long forms (e.g. Corporation, Incorporated, Limited etc.) and abbreviations
 (e.g. Corp., Inc., Ltd., GmbH etc).
