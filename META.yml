@@ -1,11 +1,13 @@
 ---
-abstract: 'module for matching and manipulating company designators appended to company names'
+abstract: 'module for matching and stripping/manipulating the'
 author:
   - 'Gavin Carr <gavin@profound.net>'
 build_requires:
   Data::Dump: 0
   ExtUtils::MakeMaker: 6.59
+  File::HomeDir: 0
   Test::Exception: 0
+  Test::Files: 0
   Test::More: 0.88
 configure_requires:
   ExtUtils::MakeMaker: 6.59
@@ -24,6 +26,7 @@ no_index:
     - t
 requires:
   File::ShareDir: 0
+  FindBin: 0
   List::MoreUtils: 0
   Mouse: 0
   MouseX::NativeTraits: 0
@@ -33,5 +36,7 @@ requires:
   namespace::autoclean: 0
   perl: 5.10.0
 resources:
+  homepage: https://github.com/gavincarr/Business-CompanyDesignator
   license: http://dev.perl.org/licenses/
+  repository: https://github.com/gavincarr/Business-CompanyDesignator
 version: 0.03
