@@ -1,0 +1,5 @@
+MANIFEST.bak
+Makefile.old
+.ackrc
+share/company_designator_pl.yml
+share/company_designator_upstream.yml
