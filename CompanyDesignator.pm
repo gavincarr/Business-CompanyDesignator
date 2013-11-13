@@ -1,1 +1,0 @@
-lib/Business/CompanyDesignator.pm
