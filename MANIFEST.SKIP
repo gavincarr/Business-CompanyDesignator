@@ -2,7 +2,7 @@
 \.git
 \.gitignore
 ^blib\b
-^CompanyDesignator.pm$
+^CompanyDesignator\.pm$
 ^Record.pm$
 EXCLUDE
 ^inc\b
@@ -11,6 +11,7 @@ Makefile.old
 MANIFEST.bak
 MANIFEST.SKIP
 MYMETA.*
+^NOSYMLINKS$
 ^pm_to_blib\b
 share/company_designator_.*.yml
 TODO

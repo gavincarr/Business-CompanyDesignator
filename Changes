@@ -1,12 +1,15 @@
 Revision history for perl module Business::CompanyDesignator
 
-0.3   2013-10-15
+0.04   2013-11-14
+    * Remove symlinks from tarball for windows compatibility.
+
+0.03   2013-10-15
 
     * Fix bad race condition where abbr_long_map aliases could get NFDed.
     * Add missing dependencies to Makefile.PL.
     * Make Changes file CPAN::Changes::Spec-compatible.
 
-0.2   2013-10-09
+0.02   2013-10-09
 
     * Fill out perldocs in B::CD and B::CD::Record.
     * Refactor and simplify regex assembly code.
@@ -14,7 +17,7 @@ Revision history for perl module Business::CompanyDesignator
     * Add Business::CompanyDesignator::Record and unit tests.
     * Refactor split_designator, pulling out shared _split_designator_result.
 
-0.1   2013-09-28
+0.01   2013-09-28
 
     * Allow optional trailing commas after periods, and escape () properly.
     * Change strip_designator to split_designator, handle capturing trailing content.
