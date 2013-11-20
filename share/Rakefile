@@ -1,0 +1,15 @@
+
+desc 'Diff company_designator.yml with upstream'
+task :diff do
+  sh "diff -u company_designator.yml company_designator_upstream.yml || true"
+end
+
+desc "Sync company_designator.yml with upstream"
+task :sync do
+  sh "cp -L company_designator_upstream.yml company_designator.yml"
+end
+
+desc "Commit company_designator.yml sync changes."
+task :commit do
+  sh "git add company_designator.yml && git commit -m 'Sync company_designator.yml with upstream.'"
+end
