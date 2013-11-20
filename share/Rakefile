@@ -1,4 +1,6 @@
 
+task :default => :diff
+
 desc 'Diff company_designator.yml with upstream'
 task :diff do
   sh "diff -u company_designator.yml company_designator_upstream.yml || true"
