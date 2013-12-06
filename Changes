@@ -1,6 +1,12 @@
 Revision history for perl module Business::CompanyDesignator
 
+0.05   2013-12-07
+
+    * Bump perl version requirement to 5.010001 (thanks Andreas Koenig).
+    * Sync bundled company_designator.yml with upstream.
+
 0.04   2013-11-14
+
     * Remove symlinks from tarball for windows compatibility.
 
 0.03   2013-10-15

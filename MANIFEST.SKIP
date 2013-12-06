@@ -14,4 +14,5 @@ MYMETA.*
 ^NOSYMLINKS$
 ^pm_to_blib\b
 share/company_designator_.*.yml
+share/Rakefile
 TODO
