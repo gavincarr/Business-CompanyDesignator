@@ -3,7 +3,7 @@ use inc::Module::Install;
 name          'Business-CompanyDesignator';
 all_from      'lib/Business/CompanyDesignator.pm';
 license       'perl';
-perl_version  '5.010';
+perl_version  '5.010001';
 homepage      'https://github.com/gavincarr/Business-CompanyDesignator';
 repository    'https://github.com/gavincarr/Business-CompanyDesignator';
 

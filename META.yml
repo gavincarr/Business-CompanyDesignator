@@ -34,9 +34,9 @@ requires:
   Unicode::Normalize: 0
   YAML: 0
   namespace::autoclean: 0
-  perl: 5.10.0
+  perl: 5.10.1
 resources:
   homepage: https://github.com/gavincarr/Business-CompanyDesignator
   license: http://dev.perl.org/licenses/
   repository: https://github.com/gavincarr/Business-CompanyDesignator
-version: 0.04
+version: 0.05

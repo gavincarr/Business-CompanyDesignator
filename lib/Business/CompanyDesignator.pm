@@ -2,7 +2,7 @@ package Business::CompanyDesignator;
 
 # Require perl 5.010 because the 'track' functionality of Regexp::Assemble
 # is unsafe for earlier versions.
-use 5.010;
+use 5.010001;
 use Mouse;
 use utf8;
 use warnings qw(FATAL utf8);
@@ -16,7 +16,7 @@ use Carp;
 
 use Business::CompanyDesignator::Record;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 has 'datafile' => ( is => 'ro', default => sub {
   # Development/test version
@@ -197,7 +197,7 @@ company designators appended to company names
 
 =head1 VERSION
 
-Version: 0.04.
+Version: 0.05.
 
 This module is considered an B<ALPHA> release. Interfaces may change and/or break
 without notice until the module reaches version 1.0.
