@@ -16,6 +16,12 @@ Aktieselskab:
 Allmennaksjeselskap:
   abbr: ASA
   lang: no
+'Anonim Ortaklık':
+  abbr: A.O.
+  lang: tr
+'Anonim Şirket':
+  abbr: 'A.Ş.'
+  lang: tr
 Anpartsselskab:
   abbr: ApS
   lang: da
@@ -103,9 +109,15 @@ eingetragene Verein:
     - ГУП
     - GUP
   lang: ru
+Handelsbolag:
+  abbr: HB
+  lang: se
 'hlutafélag':
   abbr: hf.
   lang: is
+'Halka Açık Anonim Ortaklık':
+  abbr: HAAO
+  lang: tr
 Incorporated:
   abbr:
     - Inc.
@@ -128,6 +140,21 @@ Kabushiki Kaisha:
     - K.K.
     - Corporation K.K.
   lang: ja
+Kollektivgesellschaft:
+  abbr: KolG
+  lang: de
+'Kolektif Şirket':
+  abbr: 'Koll. Şti.'
+  lang: tr
+'Komandit Şirket':
+  abbr: 'Kom. Şti'
+  lang: tr
+Kommanditbolag:
+  abbr: KB
+  lang: se
+Kommanditaktiengesellschaft:
+  abbr: KomAG
+  lang: de
 Kommanditgesellschaft:
   abbr:
     - KG
@@ -150,6 +177,9 @@ Kommanditgesellschaft auf Aktien:
 Kommanditselskab:
   abbr: 'K/S'
   lang: da
+'Kooperatif Şirket':
+  abbr: Koop.
+  lang: tr
 'Korlátolt Felelősségű Társaság':
   abbr: Kft.
   lang: hu
@@ -181,6 +211,14 @@ Limited Company:
     - Company Ltd.
     - Company Limited
   lang: en
+'Limited Ortaklık':
+  abbr: L.O.
+  lang: tr
+'Limited Şirket':
+  abbr:
+    - 'Ltd. Şti.'
+    - 'L.Ş.'
+  lang: tr
 Limited Partnership:
   abbr:
     - L.P.
@@ -208,6 +246,9 @@ Naamloze vennootschap:
     - N.V.
     - N.V. Nv
   lang: nl
+No Liability:
+  abbr: NL
+  lang: en
 'Nyilvánosan Működő Részvénytársaság':
   abbr: Nyrt.
   lang: hu
@@ -279,6 +320,12 @@ Public Limited Company:
 Sendirian Berhad:
   abbr: Sdn. Bhd.
   lang: ms
+Shoqeri Aksionere:
+  abbr: Sh.A.
+  lang: sq
+Shoqeri me pergjegjesi te kufizuar:
+  abbr: Sh.p.k.
+  lang: sq
 Single Member Private Limited Company:
   abbr: SM Pte. Ltd.
   lang: en
@@ -292,6 +339,30 @@ Single Member Private Limited Company:
   lang: es
 'Sociedad Anónima Deportiva':
   abbr: S.A.D.
+  lang: es
+'Sociedad Anónima Laboral':
+  abbr: S.A.L.
+  lang: es
+Sociedad Colectiva:
+  abbr:
+    - S.C.
+    - Soc.Col.
+    - Soc. Col.
+  lang: es
+Sociedad Comanditaria:
+  abbr: S.Cra.
+  lang: es
+Sociedad Cooperativa:
+  abbr: S.Coop.
+  lang: es
+Sociedad de Capital e Industria:
+  abbr: S.C.e.I.
+  lang: es
+Sociedad del Estado:
+  abbr: S.E.
+  lang: es
+'Sociedad de Garantía Reciproca':
+  abbr: S.G.R.
   lang: es
 Sociedad en Comandita Simple:
   abbr:
@@ -319,6 +390,12 @@ Sociedad en Nombre Colectivo:
   lang: es
 Sociedad Limitada:
   abbr: S.L.
+  lang: es
+Sociedad Limitada Laboral:
+  abbr: S.L.L.
+  lang: es
+Sociedad Limitada Nueva Empresa:
+  abbr: S.L.N.E.
   lang: es
 'Sociedade anônima':
   abbr: S.A.
@@ -360,8 +437,14 @@ Sociedad Limitada:
 'Société commerciale canadienne':
   abbr: S.C.C.
   lang: fr
+'Société en commandite':
+  abbr: SC
+  lang: fr
 'Société en commandite simple':
   abbr: SECS
+  lang: fr
+'Société en nom collectif':
+  abbr: SNC
   lang: fr
 'Société par actions de régime fédéral':
   abbr: S.A.R.F.
@@ -402,6 +485,9 @@ Sociedad Limitada:
     - Sp. z o.o. Sp.k.
     - Sp. z o.o. S.K.A.
   lang: pl
+Unlimited Proprietary:
+  abbr: Pty.
+  lang: en
 Vereniging zonder winstoogmerk:
   abbr: VZW
   lang: nl
