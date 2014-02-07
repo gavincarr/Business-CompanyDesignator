@@ -16,7 +16,7 @@ use Carp;
 
 use Business::CompanyDesignator::Record;
 
-our $VERSION = '0.05';
+our $VERSION = '0.0501';
 
 has 'datafile' => ( is => 'ro', default => sub {
   # Development/test version
