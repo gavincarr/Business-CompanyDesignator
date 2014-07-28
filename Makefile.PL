@@ -15,7 +15,7 @@ requires      'MouseX::NativeTraits';
 requires      'namespace::autoclean';
 requires      'Regexp::Assemble';
 requires      'Unicode::Normalize';
-requires      'YAML';
+requires      'YAML' => 0.71;
 
 test_requires 'Data::Dump';
 test_requires 'File::HomeDir';
