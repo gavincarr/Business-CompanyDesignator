@@ -36,9 +36,11 @@ for my $t (@$good) {
     is($trailing, $after, "$company_name trailing ok: " . ($trailing // 'undef'));
   }
 
-  my @records = $bcd->records($normalised_des);
-  ok(scalar @records, 'records returned ' . scalar(@records) . ' record(s): '
-    . join(',', map { $_->long } @records));
+  if ($normalised_des) {
+    my @records = $bcd->records($normalised_des);
+    ok(scalar @records, 'records returned ' . scalar(@records) . ' record(s): '
+      . join(',', map { $_->long } @records));
+  }
 }
 
 for my $company_name (@bad) {
