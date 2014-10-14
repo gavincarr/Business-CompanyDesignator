@@ -89,6 +89,7 @@ sub record {
 # Return a list of B::CD::Records for $designator
 sub records {
   my ($self, $designator) = @_;
+  croak "Missing designator" if ! $designator;
   if (exists $self->data->{$designator}) {
     return ( $self->record($designator) );
   }
