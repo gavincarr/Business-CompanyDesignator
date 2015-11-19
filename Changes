@@ -1,5 +1,9 @@
 Revision history for perl module Business::CompanyDesignator
 
+0.07   2015-11-19
+    * Add a couple more test cases (US N.A.).
+    * Sync bundled company_designator.yml with upstream.
+
 0.06   2014-07-28
     * Bump min YAML requirement to 0.71 to fix problems loading utf8.
 
