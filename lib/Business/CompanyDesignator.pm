@@ -15,6 +15,7 @@ use Unicode::Normalize;
 use Carp;
 
 use Business::CompanyDesignator::Record;
+use Business::CompanyDesignator::SplitResult;
 
 our $VERSION = '0.08';
 
@@ -128,7 +129,7 @@ sub _add_to_assembler {
   # Also add pattern => $string mapping to pattern_string_map
   $self->pattern_string_map->{ join '', @pattern } = $reference_string;
 
-  # If $string contains unicode diacritics, also add a version without them for misspellings 
+  # If $string contains unicode diacritics, also add a version without them for misspellings
   if ($string =~ m/\pM/) {
     my $stripped = $string;
     $stripped =~ s/\pM//g;
@@ -188,9 +189,21 @@ sub _build_lead_regex {
 sub _split_designator_result {
   my $self = shift;
   my ($before, $des, $after, $matched_pattern) = @_;
-  my $normalised_string = $self->pattern_string_map->{$matched_pattern}
-    or die "Cannot find matched pattern '$matched_pattern' in pattern_string_map";
-  return map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($before, $des, $after, $normalised_string);
+
+  my $normalised_des;
+  if ($matched_pattern) {
+    $normalised_des = $self->pattern_string_map->{$matched_pattern}
+      or die "Cannot find matched pattern '$matched_pattern' in pattern_string_map";
+  }
+
+  return wantarray ?
+    map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($before, $des, $after, $normalised_des) :
+    Business::CompanyDesignator::SplitResult->new(
+      before            => NFC($before // ''),
+      designator        => NFC($des // ''),
+      designator_std    => NFC($normalised_des // ''),
+      after             => NFC($after // ''),
+    );
 }
 
 # Split $company_name on (the first) company designator, returning a triplet of strings:
@@ -221,7 +234,7 @@ sub split_designator {
   }
   # No match - return $company_name unchanged
   else {
-    return ($company_name);
+    return $self->_split_designator_result($company_name);
   }
 }
 
@@ -250,7 +263,7 @@ long forms (e.g. Corporation, Incorporated, Limited etc.) and abbreviations
 (e.g. Corp., Inc., Ltd., GmbH etc).
 
   use Business::CompanyDesignator;
-  
+
   # Constructor
   $bcd = Business::CompanyDesignator->new;
   # Optionally, you can provide your own company_designator.yml file, instead of the bundled one
