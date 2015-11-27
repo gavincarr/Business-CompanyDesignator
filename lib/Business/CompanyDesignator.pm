@@ -16,7 +16,7 @@ use Carp;
 
 use Business::CompanyDesignator::Record;
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 has 'datafile' => ( is => 'ro', default => sub {
   # Development/test version
@@ -28,7 +28,7 @@ has 'datafile' => ( is => 'ro', default => sub {
   return dist_file('Business-CompanyDesignator', 'company_designator.yml');
 });
 
-has [ qw(data assembler regex) ] => ( is => 'ro', lazy_build => 1 );
+has [ qw(data assembler regex lead_assembler lead_regex) ] => ( is => 'ro', lazy_build => 1 );
 
 # abbr_long_map is a hash mapping abbreviations (strings) back to an arrayref of
 # long designators (since abbreviations are not necessarily unique)
@@ -44,6 +44,12 @@ sub _build_data {
 }
 
 sub _build_assembler {
+  my $self = shift;
+  # RA constructor - case insensitive, with match tracking
+  Regexp::Assemble->new->flags('i')->track(1);
+}
+
+sub _build_lead_assembler {
   my $self = shift;
   # RA constructor - case insensitive, with match tracking
   Regexp::Assemble->new->flags('i')->track(1);
@@ -103,13 +109,13 @@ sub records {
 
 # Add $string to regex assembler
 sub _add_to_assembler {
-  my ($self, $string, $reference_string) = @_;
+  my ($self, $assembler, $string, $reference_string) = @_;
   $reference_string ||= $string;
 
   # FIXME: RA->add() doesn't work here because of known quantifier-escaping bugs:
   # https://rt.cpan.org/Public/Bug/Display.html?id=50228
   # https://rt.cpan.org/Public/Bug/Display.html?id=74449
-  # $self->assembler->add($string)
+  # $assembler->add($string)
   # Workaround by lexing and using insert()
   my @pattern = map {
     # Periods are treated as optional literals, with optional trailing commas and/or whitespace
@@ -117,7 +123,7 @@ sub _add_to_assembler {
     # Escape other regex metacharacters
     /[()]/ ? "\\$_" : $_
   } split //, $string;
-  $self->assembler->insert(@pattern);
+  $assembler->insert(@pattern);
 
   # Also add pattern => $string mapping to pattern_string_map
   $self->pattern_string_map->{ join '', @pattern } = $reference_string;
@@ -126,7 +132,7 @@ sub _add_to_assembler {
   if ($string =~ m/\pM/) {
     my $stripped = $string;
     $stripped =~ s/\pM//g;
-    $self->_add_to_assembler($stripped, $string);
+    $self->_add_to_assembler($assembler, $stripped, $string);
   }
 }
 
@@ -134,30 +140,57 @@ sub _add_to_assembler {
 sub _build_regex {
   my $self = shift;
 
+  my $assembler = $self->assembler;
+
   while (my ($long, $entry) = each %{ $self->data }) {
     my $long_nfd = NFD($long);
-    $self->_add_to_assembler($long_nfd);
+    $self->_add_to_assembler($assembler, $long_nfd);
 
     # Add all abbreviations
     if (my $abbr_list = $entry->{abbr}) {
       $abbr_list = [ $abbr_list ] if ! ref $abbr_list;
       for my $abbr (@$abbr_list) {
         my $abbr_nfd = NFD($abbr);
-        $self->_add_to_assembler($abbr_nfd);
+        $self->_add_to_assembler($assembler, $abbr_nfd);
       }
     }
   }
 
-  return $self->assembler->re;
+  return $assembler->re;
+}
+
+# Assemble designator lead_regex, for patterns that have 'lead' set
+sub _build_lead_regex {
+  my $self = shift;
+
+  my $assembler = $self->lead_assembler;
+
+  while (my ($long, $entry) = each %{ $self->data }) {
+    next if ! $entry->{lead};
+
+    my $long_nfd = NFD($long);
+    $self->_add_to_assembler($assembler, $long_nfd);
+
+    # Add all abbreviations
+    if (my $abbr_list = $entry->{abbr}) {
+      $abbr_list = [ $abbr_list ] if ! ref $abbr_list;
+      for my $abbr (@$abbr_list) {
+        my $abbr_nfd = NFD($abbr);
+        $self->_add_to_assembler($assembler, $abbr_nfd);
+      }
+    }
+  }
+
+  return $assembler->re;
 }
 
 # Helper to return split_designator results
 sub _split_designator_result {
   my $self = shift;
   my ($before, $des, $after, $matched_pattern) = @_;
-  my $matched_string = $self->pattern_string_map->{$matched_pattern}
+  my $normalised_string = $self->pattern_string_map->{$matched_pattern}
     or die "Cannot find matched pattern '$matched_pattern' in pattern_string_map";
-  return map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($before, $des, $after, $matched_string);
+  return map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($before, $des, $after, $normalised_string);
 }
 
 # Split $company_name on (the first) company designator, returning a triplet of strings:
@@ -172,13 +205,18 @@ sub split_designator {
   my $company_name_match = NFD($company_name);
 
   my $re = $self->regex;
+  my $lead_re = $self->lead_regex;
 
   # Designators are usually final, so try that first
-  if ($company_name_match =~ m/(.*?)[[:punct:]]*\s+($re)\s*$/) {
+  if ($company_name_match =~ m/^\s*(.*?)\p{XPosixPunct}*\s+($re)\s*$/) {
     return $self->_split_designator_result($1, $2, undef, $self->assembler->source($^R));
   }
+  # Not final - check for a lead designator instead (e.g. RU, NL, etc.)
+  elsif ($company_name_match =~ m/^\s*($lead_re)\p{XPosixPunct}*\s*(.*?)\s*$/) {
+    return $self->_split_designator_result($2, $1, undef, $self->lead_assembler->source($^R));
+  }
   # Not final - check for an embedded designator with trailing content
-  elsif ($company_name_match =~ m/(.*?)[[:punct:]]*\s+($re)(?:\s+(.*?))?$/) {
+  elsif ($company_name_match =~ m/(.*?)\p{XPosixPunct}*\s+($re)(?:\s+(.*?))?$/) {
     return $self->_split_designator_result($1, $2, $3, $self->assembler->source($^R));
   }
   # No match - return $company_name unchanged
@@ -198,7 +236,7 @@ company designators appended to company names
 
 =head1 VERSION
 
-Version: 0.05.
+Version: 0.08.
 
 This module is considered an B<ALPHA> release. Interfaces may change and/or break
 without notice until the module reaches version 1.0.
@@ -344,7 +382,7 @@ Gavin Carr <gavin@profound.net>
 
 =head1 COPYRIGHT AND LICENCE
 
-Copyright (C) 2013 Gavin Carr and Profound Networks.
+Copyright (C) 2013-2015 Gavin Carr
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
