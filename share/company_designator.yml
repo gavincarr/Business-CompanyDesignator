@@ -46,6 +46,7 @@ Chartered:
 Commanditaire vennootschap:
   abbr: C.V.
   lang: nl
+  lead: 1
 Company:
   abbr:
     - Co.
@@ -261,6 +262,7 @@ No Liability:
     - ООО
     - OOO
   lang: ru
+  lead: 1
 offene Gesellschaft:
   abbr: OG
   lang: de
@@ -403,6 +405,12 @@ Sociedad Limitada Laboral:
 Sociedad Limitada Nueva Empresa:
   abbr: S.L.N.E.
   lang: es
+Sociedad Limitada Personal:
+  abbr: S.L.P.
+  lang: es
+Sociedad Limitada Unipersonal:
+  abbr: S.L.U.
+  lang: es
 'Sociedade anônima':
   abbr: S.A.
   lang: pt
@@ -494,14 +502,21 @@ Vereniging zonder winstoogmerk:
 Vereinigung ohne Gewinnerzielungsabsicht:
   abbr: VoG
   lang: de
-Vennootschap onder firma:
-  abbr: V.O.F.
+Vennootschap:
   lang: nl
+  lead: 1
+Vennootschap onder firma:
+  abbr:
+    - V.O.F.
+    - De vennootschap onder firma
+  lang: nl
+  lead: 1
 'Закрытое акционерное общество':
   abbr:
     - ЗАО
     - ZAO
   lang: ru
+  lead: 1
 'Zártkörűen Működő Részvénytársaság':
   abbr: Zrt.
   lang: hu
