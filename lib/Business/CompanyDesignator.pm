@@ -190,23 +190,28 @@ sub _split_designator_result {
   my $self = shift;
   my ($before, $des, $after, $matched_pattern) = @_;
 
-  my $short_name = $before || $after;
+  my $short_name = $before || $after
+    or croak "Either a 'before' or an 'after' argument is required";
   my $extra = $before ? $after : undef;
 
-  my $normalised_des;
+  my $des_std;
   if ($matched_pattern) {
-    $normalised_des = $self->pattern_string_map->{$matched_pattern}
+    $des_std = $self->pattern_string_map->{$matched_pattern}
       or die "Cannot find matched pattern '$matched_pattern' in pattern_string_map";
   }
 
-  return wantarray ?
-    map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($short_name, $des, $extra, $normalised_des) :
-    Business::CompanyDesignator::SplitResult->new(
-      before            => NFC($before // ''),
-      designator        => NFC($des // ''),
-      designator_std    => NFC($normalised_des // ''),
-      after             => NFC($after // ''),
-    );
+  # Legacy interface - return a simple before / des / after tuple, plus $des_std
+  return map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($short_name, $des, $extra, $des_std)
+    if wantarray;
+
+  # New scalar-context interface - return SplitResult object
+  Business::CompanyDesignator::SplitResult->new(
+    before          => NFC($before // ''),
+    designator      => NFC($des // ''),
+    designator_std  => NFC($des_std // ''),
+    after           => NFC($after // ''),
+    records         => [ $des_std ? $self->records(NFC $des_std) : () ],
+  );
 }
 
 # Split $company_name on (the first) company designator, returning a triplet of strings:

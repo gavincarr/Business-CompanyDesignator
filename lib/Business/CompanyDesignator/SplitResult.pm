@@ -7,7 +7,8 @@ use Carp;
 use namespace::autoclean;
 
 has [ qw(before after designator designator_std) ] =>
-  ( is => 'ro', isa => 'Str' );
+  ( is => 'ro', isa => 'Str', required => 1 );
+has 'records' => ( is => 'ro', isa => 'ArrayRef', required => 1 );
 
 sub short_name {
   my $self = shift;
@@ -41,8 +42,11 @@ L<Business::CompanyDesignator::split_designator> result records
   say $res->extra;              # (Australia) ($res->before ? $res->after : '')
   say $res->designator;         # Pty Ltd (designator as found in input string)
   say $res->designator_std;     # Pty. Ltd. (standardised version of designator)
-  say $res->designator_long;    # Proprietary Limited (long version of designator)
-  say $res->designator_lang;    # en (designator language)
+
+  # Designator records arrayref (since designator might be ambiguous and map to multiple)
+  foreach (@{ $res->records }) {
+    say join ", ", $_->long, $_->lang;
+  }
 
 
 =head1 ACCESSORS

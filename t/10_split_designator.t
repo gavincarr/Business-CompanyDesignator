@@ -19,7 +19,7 @@ my @bad = (
   'Open Fusion Pty1 Ltd2',
 );
 
-my ($bcd, $data);
+my ($bcd, $data, $records);
 
 ok($bcd = Business::CompanyDesignator->new, 'constructor ok');
 ok($data = $bcd->data, 'data method ok');
@@ -51,6 +51,11 @@ for my $t (@$good) {
   is($res->designator_std, $exp_des_std // '', "$company_name designator_std ok: " . ($res->designator_std // 'undef'));
   if ($res->extra || $extra) {
     is($res->extra, $extra, "$company_name extra ok: " . ($res->extra // 'undef'));
+  }
+  if ($res->designator_std) {
+    ok($records = $res->records, "$company_name result object includes records: " . scalar(@$records));
+    ok($records->[0]->long, 'record 0 long exists: ' . $records->[0]->long);
+    ok($records->[0]->lang, 'record 0 lang exists: ' . $records->[0]->lang);
   }
 }
 
