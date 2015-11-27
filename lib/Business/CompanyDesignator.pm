@@ -190,6 +190,9 @@ sub _split_designator_result {
   my $self = shift;
   my ($before, $des, $after, $matched_pattern) = @_;
 
+  my $short_name = $before || $after;
+  my $extra = $before ? $after : undef;
+
   my $normalised_des;
   if ($matched_pattern) {
     $normalised_des = $self->pattern_string_map->{$matched_pattern}
@@ -197,7 +200,7 @@ sub _split_designator_result {
   }
 
   return wantarray ?
-    map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($before, $des, $after, $normalised_des) :
+    map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($short_name, $des, $extra, $normalised_des) :
     Business::CompanyDesignator::SplitResult->new(
       before            => NFC($before // ''),
       designator        => NFC($des // ''),
@@ -226,7 +229,7 @@ sub split_designator {
   }
   # Not final - check for a lead designator instead (e.g. RU, NL, etc.)
   elsif ($company_name_match =~ m/^\s*($lead_re)\p{XPosixPunct}*\s*(.*?)\s*$/) {
-    return $self->_split_designator_result($2, $1, undef, $self->lead_assembler->source($^R));
+    return $self->_split_designator_result(undef, $1, $2, $self->lead_assembler->source($^R));
   }
   # Not final - check for an embedded designator with trailing content
   elsif ($company_name_match =~ m/(.*?)\p{XPosixPunct}*\s+($re)(?:\s+(.*?))?$/) {

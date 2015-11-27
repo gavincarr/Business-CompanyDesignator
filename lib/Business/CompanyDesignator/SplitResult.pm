@@ -6,8 +6,18 @@ use warnings qw(FATAL utf8);
 use Carp;
 use namespace::autoclean;
 
-has [ qw(before designator after designator_std) ] =>
-  ( is => 'ro', isa => 'Str|Undef' );
+has [ qw(before after designator designator_std) ] =>
+  ( is => 'ro', isa => 'Str' );
+
+sub short_name {
+  my $self = shift;
+  $self->before || $self->after;
+}
+
+sub extra {
+  my $self = shift;
+  $self->before ? $self->after : '';
+}
 
 __PACKAGE__->meta->make_immutable;
 
@@ -26,11 +36,13 @@ L<Business::CompanyDesignator::split_designator> result records
 
   # Accessors
   say $res->before;             # Open Fusion (trimmed text before designator)
+  say $res->after;              # (Australia) (trimmed text after designator)
+  say $res->short_name;         # Open Fusion ($res->before || $res->after)
+  say $res->extra;              # (Australia) ($res->before ? $res->after : '')
   say $res->designator;         # Pty Ltd (designator as found in input string)
   say $res->designator_std;     # Pty. Ltd. (standardised version of designator)
   say $res->designator_long;    # Proprietary Limited (long version of designator)
   say $res->designator_lang;    # en (designator language)
-  say $res->after;              # (Australia) (trimmed text after designator)
 
 
 =head1 ACCESSORS

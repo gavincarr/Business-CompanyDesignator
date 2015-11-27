@@ -25,16 +25,16 @@ ok($bcd = Business::CompanyDesignator->new, 'constructor ok');
 ok($data = $bcd->data, 'data method ok');
 
 for my $t (@$good) {
-  my ($company_name, $stripped_name, $designator, $designator_std, $after) = @$t;
+  my ($company_name, $exp_short_name, $exp_des, $exp_des_std, $exp_extra) = @$t;
 
   # Array-context split_designator
-  my ($strip, $des, $trailing, $normalised_des) = $bcd->split_designator($company_name);
+  my ($short_name, $des, $extra, $normalised_des) = $bcd->split_designator($company_name);
 
-  is($strip, $stripped_name, "$company_name: stripped name ok: $strip");
-  is($des,   $designator, "$company_name designator ok: " . ($des // 'undef'));
-  is($normalised_des, $designator_std, "$company_name normalised_des ok: " . ($normalised_des // 'undef'));
-  if ($after || $trailing) {
-    is($trailing, $after, "$company_name trailing ok: " . ($trailing // 'undef'));
+  is($short_name, $exp_short_name, "$company_name: stripped name ok: $short_name");
+  is($des, $exp_des, "$company_name designator ok: " . ($des // 'undef'));
+  is($normalised_des, $exp_des_std, "$company_name normalised_des ok: " . ($normalised_des // 'undef'));
+  if ($exp_extra || $extra) {
+    is($extra, $exp_extra, "$company_name trailing ok: " . ($extra // 'undef'));
   }
 
   # Test that $normalised_des maps back to one or more records
@@ -46,17 +46,17 @@ for my $t (@$good) {
 
   # Scalar-context split_designator
   my $res = $bcd->split_designator($company_name);
-  is($res->before, $stripped_name, "$company_name: before ok: " . $res->before);
-  is($res->designator, $designator // '', "$company_name designator ok: " . ($res->designator // 'undef'));
-  is($res->designator_std, $designator_std // '', "$company_name designator_std ok: " . ($res->designator_std // 'undef'));
-  if ($res->after || $trailing) {
-    is($res->after, $trailing, "$company_name after ok: " . ($res->after // 'undef'));
+  is($res->short_name, $exp_short_name, "$company_name: before ok: " . $res->before);
+  is($res->designator, $exp_des // '', "$company_name designator ok: " . ($res->designator // 'undef'));
+  is($res->designator_std, $exp_des_std // '', "$company_name designator_std ok: " . ($res->designator_std // 'undef'));
+  if ($res->extra || $extra) {
+    is($res->extra, $extra, "$company_name extra ok: " . ($res->extra // 'undef'));
   }
 }
 
 for my $company_name (@bad) {
-  my ($strip, $des, $after, $normalised_des) = $bcd->split_designator($company_name);
-  is($strip, $company_name, "non-matching $company_name: stripped name is company name");
+  my ($short_name, $des, $after, $normalised_des) = $bcd->split_designator($company_name);
+  is($short_name, $company_name, "non-matching $company_name: stripped name is company name");
   is($des, undef, "non-matching $company_name: designator undef");
   is($normalised_des, undef, "non-matching $company_name: normalised_des undef");
 }
