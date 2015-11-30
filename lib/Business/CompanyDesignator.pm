@@ -190,10 +190,6 @@ sub _split_designator_result {
   my $self = shift;
   my ($before, $des, $after, $matched_pattern) = @_;
 
-  my $short_name = $before || $after
-    or croak "Either a 'before' or an 'after' argument is required";
-  my $extra = $before ? $after : undef;
-
   my $des_std;
   if ($matched_pattern) {
     $des_std = $self->pattern_string_map->{$matched_pattern}
@@ -201,7 +197,7 @@ sub _split_designator_result {
   }
 
   # Legacy interface - return a simple before / des / after tuple, plus $des_std
-  return map { defined $_ && ! ref $_ ? NFC($_) : $_ } ($short_name, $des, $extra, $des_std)
+  return map { defined $_ && ! ref $_ ? NFC($_) : '' } ($before, $des, $after, $des_std)
     if wantarray;
 
   # New scalar-context interface - return SplitResult object
