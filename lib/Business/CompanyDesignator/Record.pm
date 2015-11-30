@@ -38,7 +38,7 @@ __PACKAGE__->meta->make_immutable;
 
 =head1 NAME
 
-Business::CompanyDesignator::Record - class for modelling individual L<Business::CompanyDesignator> records
+Business::CompanyDesignator::Record - class for modelling individual L<Business::CompanyDesignator> input records
 
 =head1 SYNOPSIS
 
@@ -100,7 +100,7 @@ Gavin Carr <gavin@profound.net>
 
 =head1 COPYRIGHT AND LICENCE
 
-Copyright (C) 2013 Gavin Carr and Profound Networks.
+Copyright (C) 2013-2015 Gavin Carr
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
