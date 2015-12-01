@@ -1,5 +1,12 @@
 Revision history for perl module Business::CompanyDesignator
 
+0.08   2015-12-01
+    * Update split_designator to support 'lead' designators in dataset.
+    * Add CompanyDesignator::SplitResult class and unit tests.
+    * Update CompanyDesignator::split_designator to return a SplitResult object in scalar context.
+    * Update CompanyDesignator to accept/use lang argument to split_designator.
+    * Sync company_designator.yml with upstream.
+
 0.07   2015-11-19
     * Add a couple more test cases (US N.A.).
     * Sync bundled company_designator.yml with upstream.
