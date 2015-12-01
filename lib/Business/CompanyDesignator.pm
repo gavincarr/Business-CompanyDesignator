@@ -29,7 +29,11 @@ has 'datafile' => ( is => 'ro', default => sub {
   return dist_file('Business-CompanyDesignator', 'company_designator.yml');
 });
 
-has [ qw(data assembler regex lead_assembler lead_regex) ] => ( is => 'ro', lazy_build => 1 );
+# data is the raw dataset as loaded from datafile
+has data => ( is => 'ro', lazy_build => 1 );
+
+# regex_cache is a cache of regexes by language and type, since they're expensive to build
+has 'regex_cache' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
 
 # abbr_long_map is a hash mapping abbreviations (strings) back to an arrayref of
 # long designators (since abbreviations are not necessarily unique)
@@ -42,18 +46,6 @@ has 'pattern_string_map' => ( is => 'ro', isa => 'HashRef', default => sub { {} 
 sub _build_data {
   my $self = shift;
   YAML::LoadFile($self->datafile);
-}
-
-sub _build_assembler {
-  my $self = shift;
-  # RA constructor - case insensitive, with match tracking
-  Regexp::Assemble->new->flags('i')->track(1);
-}
-
-sub _build_lead_assembler {
-  my $self = shift;
-  # RA constructor - case insensitive, with match tracking
-  Regexp::Assemble->new->flags('i')->track(1);
 }
 
 sub _build_abbr_long_map {
@@ -140,10 +132,17 @@ sub _add_to_assembler {
 # Assemble designator regex
 sub _build_regex {
   my $self = shift;
+  my ($type, $lang) = shift;
 
-  my $assembler = $self->assembler;
+  # RA constructor - case insensitive, with match tracking
+  my $assembler = Regexp::Assemble->new->flags('i')->track(1);
 
   while (my ($long, $entry) = each %{ $self->data }) {
+    # If $type is begin, restrict to 'lead' entries
+    next if $type eq 'begin' && ! $entry->{lead};
+    # If $lang is set, restrict to entries that include $lang
+    next if $lang && $entry->{lang} ne $lang;
+
     my $long_nfd = NFD($long);
     $self->_add_to_assembler($assembler, $long_nfd);
 
@@ -157,32 +156,26 @@ sub _build_regex {
     }
   }
 
-  return $assembler->re;
+  return wantarray ? ( $assembler->re, $assembler ) : $assembler->re;
 }
 
-# Assemble designator lead_regex, for patterns that have 'lead' set
-sub _build_lead_regex {
+# Regex accessor, returning regexes by type (begin/end) and language (en, es, etc.)
+# $type defaults to 'end', $lang defaults to undef (for all)
+sub regex {
   my $self = shift;
+  my ($type, $lang) = @_;
+  $type ||= 'end';
 
-  my $assembler = $self->lead_assembler;
+  my $cache_key = $type;
+  $cache_key .= "_$lang" if $lang;
 
-  while (my ($long, $entry) = each %{ $self->data }) {
-    next if ! $entry->{lead};
-
-    my $long_nfd = NFD($long);
-    $self->_add_to_assembler($assembler, $long_nfd);
-
-    # Add all abbreviations
-    if (my $abbr_list = $entry->{abbr}) {
-      $abbr_list = [ $abbr_list ] if ! ref $abbr_list;
-      for my $abbr (@$abbr_list) {
-        my $abbr_nfd = NFD($abbr);
-        $self->_add_to_assembler($assembler, $abbr_nfd);
-      }
-    }
+  if (my $entry = $self->regex_cache->{ $cache_key }) {
+    return wantarray ? @$entry : $entry->[0];
   }
 
-  return $assembler->re;
+  my ($re, $assembler) = $self->_build_regex($type, $lang);
+  $self->regex_cache->{ $cache_key } = [ $re, $assembler ];
+  return wantarray ? ( $re, $assembler ) : $re;
 }
 
 # Helper to return split_designator results
@@ -218,23 +211,23 @@ sub _split_designator_result {
 # but "Ltée" for the normalised form
 sub split_designator {
   my $self = shift;
-  my $company_name = shift;
+  my ($company_name, %arg) = @_;
   my $company_name_match = NFD($company_name);
 
-  my $re = $self->regex;
-  my $lead_re = $self->lead_regex;
+  my ($re, $assembler) = $self->regex('end');
+  my ($lead_re, $lead_assembler) = $self->regex('begin');
 
   # Designators are usually final, so try that first
   if ($company_name_match =~ m/^\s*(.*?)\p{XPosixPunct}*\s+($re)\s*$/) {
-    return $self->_split_designator_result($1, $2, undef, $self->assembler->source($^R));
+    return $self->_split_designator_result($1, $2, undef, $assembler->source($^R));
   }
   # Not final - check for a lead designator instead (e.g. RU, NL, etc.)
   elsif ($company_name_match =~ m/^\s*($lead_re)\p{XPosixPunct}*\s*(.*?)\s*$/) {
-    return $self->_split_designator_result(undef, $1, $2, $self->lead_assembler->source($^R));
+    return $self->_split_designator_result(undef, $1, $2, $lead_assembler->source($^R));
   }
   # Not final - check for an embedded designator with trailing content
   elsif ($company_name_match =~ m/(.*?)\p{XPosixPunct}*\s+($re)(?:\s+(.*?))?$/) {
-    return $self->_split_designator_result($1, $2, $3, $self->assembler->source($^R));
+    return $self->_split_designator_result($1, $2, $3, $assembler->source($^R));
   }
   # No match - return $company_name unchanged
   else {
