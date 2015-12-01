@@ -240,6 +240,8 @@ sub split_designator {
 
 __END__
 
+=encoding utf-8
+
 =head1 NAME
 
 Business::CompanyDesignator - module for matching and stripping/manipulating the
@@ -256,9 +258,9 @@ without notice until the module reaches version 1.0.
 =head1 SYNOPSIS
 
 Business::CompanyDesignator is a perl module for matching and stripping/manipulating
-the typical company designators appended to company names. It supports both
-long forms (e.g. Corporation, Incorporated, Limited etc.) and abbreviations
-(e.g. Corp., Inc., Ltd., GmbH etc).
+the typical company designators appended (or sometimes, prepended) to company names.
+It supports both long forms (e.g. Corporation, Incorporated, Limited etc.) and
+abbreviations (e.g. Corp., Inc., Ltd., GmbH etc).
 
   use Business::CompanyDesignator;
 
@@ -278,14 +280,20 @@ long forms (e.g. Corporation, Incorporated, Limited etc.) and abbreviations
   # Lookup records by abbreviation or long designator (may not be unique)
   @records = $bcd->records($designator);
 
-  # Get a regex for matching designators
+  # Get a regex for matching designators by type ('end'/'begin') and lang
+  # By default, returns 'end' regexes for all languages
   $re = $bcd->regex;
   $company_name =~ $re and say 'designator found!';
   $company_name =~ /$re\s*$/ and say 'final designator found!';
+  my $re_begin_en = $bcd->regex('begin', 'en');
 
   # Split $company_name on designator, returning a ($before, $designator, $after) triplet,
-  # plus the normalised form of the designator matched.
-  ($short_name, $des, $after, $normalised_des) = $bcd->split_designator($company_name);
+  # plus the normalised form of the designator matched (can pass to records(), for example)
+  ($before, $des, $after, $normalised_des) = $bcd->split_designator($company_name);
+
+  # Or in scalar context, return a L<Business::CompanyDesignator::SplitResult> object
+  $res = $bcd->split_designator($company_name, lang => 'en');
+  print join ' / ', $res->designator_std, $res->short_name, $res->extra;
 
 
 =head1 DATASET
@@ -360,28 +368,63 @@ records).
 Use this method for abbreviations, or if you're aren't sure of a
 designator's type.
 
-=head2 regex()
+=head2 regex([$type], [$lang])
 
-Returns a regex that matches all designators from the dataset
-(case-insensitive, non-anchored).
+Returns a regex for all matching designators for $type ('begin'/'end') and
+$lang (iso 639-1 language code e.g. 'en', 'es', de', etc.) from the dataset.
+The regex is case-insensitive and non-anchored.
+
+$type defaults to 'end', so without parameters regex() returns a regex
+matching all designators for all languages.
 
 =head2 split_designator($company_name)
 
 Attempts to split $company_name on (the first) company designator found.
-If found, it returns a list of four items - a triplet of strings from
-$company_name: ( $before, $designator, $after ), plus a normalised version
-of the designator as a fourth element.
 
-  ($short_name, $des, $after_text, $normalised_des) = $bcd->split_designator($company_name);
+In array context split_designator returns a list of four items - a triplet of
+strings from $company_name ( $before, $designator, $after ), plus the
+standardised version of the designator as a fourth element.
 
-The initial $des designator is the designator as matched in the text, while
-the second $normalised_des is the normalised version as found in the dataset.
+  ($short_name, $des, $after_text, $des_std) = $bcd->split_designator($company_name);
+
+In scalar context split_designator returns a L<Business::CompanyDesignator::SplitResult>
+object.
+
+  $res = $bcd->split_designator($company_name);
+
+The initial $des designator (or $res->designator)  is the designator text as
+matched in $company_name, while the final $des_std in array context (or
+$res->designator_std) is the standardised version as found in the dataset.
+
 For instance, "ABC Pty Ltd" would return "Pty Ltd" as the $designator, but
-"Pty. Ltd." as the normalised form, and the latter would be what you
+"Pty. Ltd." as the stardardised form, and the latter would be what you
 would find in designators() or would lookup with records(). Similarly,
-"Accessoires XYZ Ltee" (misspelt without the grave accent) would still be
-matched, returning "Ltee" (as found) for the $designator, but "Ltée" as the
-normalised form.
+"Accessoires XYZ Ltee" (without the french acute) would match, returning
+"Ltee" (as found) for the $designator, but "Ltée" as the standardised form.
+
+split_designator also accepts an optional 'lang' parameter, which would be
+the ISO 639-1 language code for $company_name. If this is given,
+split_designator will only match designators for that language, which can
+improve the accuracy of the split.
+
+Note that split_designator won't always get the split right. It checks for
+final designators first, then leading ones, and then finally looks for embedded
+designators. This allows names like these to picked up:
+
+    Amerihealth Insurance Company of NJ
+    Trenkwalder Personal AG Schweiz
+    Vicente Campano S L (COMERCIAL VICAM)
+    Gvozdika, gostinitsa OOO ""Eko-Treyd""
+
+but it can also detect designators that are false positives e.g.
+
+    Dr S L Ledingham - Beaumont Street Practice
+
+One way to reduce this is to specify the optional 'lang' parameter if you know
+the language your company names are in. This should reduce the number of false
+positives by making fewer designators available to match on, but it doesn't
+eliminate the issue altogether.
+
 
 =head1 SEE ALSO
 
