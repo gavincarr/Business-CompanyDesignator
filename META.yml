@@ -1,5 +1,5 @@
 ---
-abstract: 'module for matching and stripping/manipulating the'
+abstract: 'module for matching and stripping/manipulating the company designators appended to company names'
 author:
   - 'Gavin Carr <gavin@profound.net>'
 build_requires:
@@ -13,7 +13,7 @@ configure_requires:
   ExtUtils::MakeMaker: 6.59
 distribution_type: module
 dynamic_config: 1
-generated_by: 'Module::Install version 1.06'
+generated_by: 'Module::Install version 1.12'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -32,11 +32,11 @@ requires:
   MouseX::NativeTraits: 0
   Regexp::Assemble: 0
   Unicode::Normalize: 0
-  YAML: 0
+  YAML: 0.71
   namespace::autoclean: 0
   perl: 5.10.1
 resources:
   homepage: https://github.com/gavincarr/Business-CompanyDesignator
   license: http://dev.perl.org/licenses/
   repository: https://github.com/gavincarr/Business-CompanyDesignator
-version: 0.05
+version: 0.08

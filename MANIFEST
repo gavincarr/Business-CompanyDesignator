@@ -1,6 +1,7 @@
 Changes
 lib/Business/CompanyDesignator.pm
 lib/Business/CompanyDesignator/Record.pm
+lib/Business/CompanyDesignator/SplitResult.pm
 MANIFEST
 META.yml
 README.md
@@ -11,8 +12,10 @@ t/02_designators.t
 t/05_records.t
 t/06_records.t
 t/10_split_designator.t
+t/11_split_designator_with_lang.t
+t/12_split_designator_diff_lang.t
 t/90_data.t
 t/manifest.t
 t/pod-coverage.t
 t/pod.t
-t/t10/good.yml
+t/t10/data.yml
