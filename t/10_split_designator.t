@@ -12,37 +12,40 @@ use FindBin qw($Bin);
 use lib "$Bin/../lib";
 use Business::CompanyDesignator;
 
-my $good = LoadFile("$Bin/t10/good.yml");
+my $data = LoadFile("$Bin/t10/data.yml");
 
 my @bad = (
   # Check we are only matching literal periods, not any character
   'Open Fusion Pty1 Ltd2',
 );
 
-my ($bcd, $data, $records);
+my ($bcd, $bcd_data, $records);
 
 # Allow running just a single set of tests
 my $only = @ARGV ? $ARGV[0] : undef;
 
 ok($bcd = Business::CompanyDesignator->new, 'constructor ok');
-ok($data = $bcd->data, 'data method ok');
+ok($bcd_data = $bcd->data, 'data method ok');
 
 my $i = 3;
-for my $t (@$good) {
-  my ($company_name, $exp_before, $exp_des, $exp_des_std, $exp_after) = @$t;
+for my $t (@$data) {
+  my $exp_before    = $t->{before}  // '';
+  my $exp_des       = $t->{des}     // '';
+  my $exp_des_std   = $t->{des_std} // '';
+  my $exp_after     = $t->{after}   // '';
 
   # Array-context split_designator
-  my ($before, $des, $after, $normalised_des) = $bcd->split_designator($company_name);
+  my ($before, $des, $after, $normalised_des) = $bcd->split_designator($t->{name});
 
   if (! $only || ($only >= $i && $only <= $i+2)) {
-    is($before, $exp_before, "(array) $company_name: before ok: $before");
-    is($des, $exp_des, "(array) $company_name designator ok: " . ($des // 'undef'));
-    is($normalised_des, $exp_des_std, "(array) $company_name normalised_des ok: " . ($normalised_des // 'undef'));
+    is($before, $exp_before, "(array) $t->{name}: before ok: $before");
+    is($des, $exp_des, "(array) $t->{name} designator ok: " . ($des // 'undef'));
+    is($normalised_des, $exp_des_std, "(array) $t->{name} normalised_des ok: " . ($normalised_des // 'undef'));
   }
   $i += 3;
   if ($exp_after || $after) {
     if (! $only || $only == $i) {
-      is($after, $exp_after, "(array) $company_name after ok: " . ($after // 'undef'));
+      is($after, $exp_after, "(array) $t->{name} after ok: " . ($after // 'undef'));
     }
     $i += 1;
   }
@@ -58,22 +61,22 @@ for my $t (@$good) {
   }
 
   # Scalar-context split_designator
-  my $res = $bcd->split_designator($company_name);
+  my $res = $bcd->split_designator($t->{name});
   if (! $only || ($only >= $i && $only <= $i+2)) {
-    is($res->before, $exp_before, "(scalar) $company_name: before ok: " . $res->before);
-    is($res->designator, $exp_des // '', "(scalar) $company_name designator ok: " . ($res->designator // 'undef'));
-    is($res->designator_std, $exp_des_std // '', "(scalar) $company_name designator_std ok: " . ($res->designator_std // 'undef'));
+    is($res->before, $exp_before, "(scalar) $t->{name}: before ok: " . $res->before);
+    is($res->designator, $exp_des // '', "(scalar) $t->{name} designator ok: " . ($res->designator // 'undef'));
+    is($res->designator_std, $exp_des_std // '', "(scalar) $t->{name} designator_std ok: " . ($res->designator_std // 'undef'));
   }
   $i += 3;
   if ($res->after || $after) {
     if (! $only || $only == $i) {
-      is($res->after, $after, "(scalar) $company_name after ok: " . ($res->after // 'undef'));
+      is($res->after, $after, "(scalar) $t->{name} after ok: " . ($res->after // 'undef'));
     }
     $i += 1;
   }
   if ($res->designator_std) {
     if (! $only || ($only >= $i && $only <= $i+2)) {
-      ok($records = $res->records, "(scalar) $company_name result object includes records: " . scalar(@$records));
+      ok($records = $res->records, "(scalar) $t->{name} result object includes records: " . scalar(@$records));
       ok($records->[0]->long, 'record 0 long exists: ' . $records->[0]->long);
       ok($records->[0]->lang, 'record 0 lang exists: ' . $records->[0]->lang);
     }
