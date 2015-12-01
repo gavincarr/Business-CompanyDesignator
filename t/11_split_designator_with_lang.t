@@ -14,11 +14,6 @@ use Business::CompanyDesignator;
 
 my $data = LoadFile("$Bin/t10/data.yml");
 
-my @bad = (
-  # Check we are only matching literal periods, not any character
-  'Open Fusion Pty1 Ltd2',
-);
-
 my ($bcd, $bcd_data, $records);
 
 # Allow running just a single set of tests
@@ -29,15 +24,17 @@ ok($bcd_data = $bcd->data, 'data method ok');
 
 my $i = 3;
 for my $t (@$data) {
-  next if $t->{skip} || $t->{skip_unless_lang};
+  die dump($t) if ! $t->{lang};
+  next if $t->{skip};
 
   my $exp_before    = $t->{before}  // '';
   my $exp_des       = $t->{des}     // '';
   my $exp_des_std   = $t->{des_std} // '';
   my $exp_after     = $t->{after}   // '';
+  my $lang          = $t->{lang};
 
   # Array-context split_designator
-  my ($before, $des, $after, $normalised_des) = $bcd->split_designator($t->{name});
+  my ($before, $des, $after, $normalised_des) = $bcd->split_designator($t->{name}, lang => $lang);
 
   if (! $only || ($only >= $i && $only <= $i+2)) {
     is($before, $exp_before, "(array) $t->{name}: before ok: $before");
@@ -63,7 +60,7 @@ for my $t (@$data) {
   }
 
   # Scalar-context split_designator
-  my $res = $bcd->split_designator($t->{name});
+  my $res = $bcd->split_designator($t->{name}, lang => $lang);
   if (! $only || ($only >= $i && $only <= $i+2)) {
     is($res->before, $exp_before, "(scalar) $t->{name}: before ok: " . $res->before);
     is($res->designator, $exp_des // '', "(scalar) $t->{name} designator ok: " . ($res->designator // 'undef'));
@@ -84,16 +81,6 @@ for my $t (@$data) {
     }
     $i += 3;
   }
-}
-
-for my $company_name (@bad) {
-  my ($before, $des, $after, $normalised_des) = $bcd->split_designator($company_name);
-  if (! $only || ($only >= $i && $only <= $i+2)) {
-    is($before, $company_name, "non-matching $company_name: before is company name");
-    is($des, '', "non-matching $company_name: designator undef");
-    is($normalised_des, '', "non-matching $company_name: normalised_des undef");
-  }
-  $i += 3;
 }
 
 done_testing;

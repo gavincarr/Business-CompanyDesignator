@@ -132,7 +132,7 @@ sub _add_to_assembler {
 # Assemble designator regex
 sub _build_regex {
   my $self = shift;
-  my ($type, $lang) = shift;
+  my ($type, $lang) = @_;
 
   # RA constructor - case insensitive, with match tracking
   my $assembler = Regexp::Assemble->new->flags('i')->track(1);
@@ -212,10 +212,11 @@ sub _split_designator_result {
 sub split_designator {
   my $self = shift;
   my ($company_name, %arg) = @_;
+  my $lang = $arg{lang};
   my $company_name_match = NFD($company_name);
 
-  my ($re, $assembler) = $self->regex('end');
-  my ($lead_re, $lead_assembler) = $self->regex('begin');
+  my ($re, $assembler) = $self->regex('end', $lang);
+  my ($lead_re, $lead_assembler) = $self->regex('begin', $lang);
 
   # Designators are usually final, so try that first
   if ($company_name_match =~ m/^\s*(.*?)\p{XPosixPunct}*\s+($re)\s*$/) {
