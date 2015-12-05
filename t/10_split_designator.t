@@ -38,6 +38,8 @@ for my $t (@$data) {
 
   # Array-context split_designator
   my ($before, $des, $after, $normalised_des) = $bcd->split_designator($t->{name});
+  my $short_name = $before || $after || '';
+  my $extra = $before ? ($after || '') : '';
 
   if (! $only || ($only >= $i && $only <= $i+2)) {
     is($before, $exp_before, "(array) $t->{name}: before ok: $before");
@@ -68,8 +70,10 @@ for my $t (@$data) {
     is($res->before, $exp_before, "(scalar) $t->{name}: before ok: " . $res->before);
     is($res->designator, $exp_des // '', "(scalar) $t->{name} designator ok: " . ($res->designator // 'undef'));
     is($res->designator_std, $exp_des_std // '', "(scalar) $t->{name} designator_std ok: " . ($res->designator_std // 'undef'));
+    is($res->short_name, $short_name, "(scalar) $t->{name} short_name ok: " . $res->short_name);
+    is($res->extra, $extra, "(scalar) $t->{name} extra ok: " . $res->extra);
   }
-  $i += 3;
+  $i += 5;
   if ($res->after || $after) {
     if (! $only || $only == $i) {
       is($res->after, $after, "(scalar) $t->{name} after ok: " . ($res->after // 'undef'));
