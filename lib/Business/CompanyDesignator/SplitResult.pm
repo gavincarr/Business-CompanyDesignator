@@ -12,7 +12,6 @@ has 'records' => ( is => 'ro', isa => 'ArrayRef', required => 1 );
 
 sub short_name {
   my $self = shift;
-  return '' if ! $self->designator;
   return $self->before || $self->after // '';
 }
 
