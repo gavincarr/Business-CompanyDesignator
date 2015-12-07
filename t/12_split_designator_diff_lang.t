@@ -30,9 +30,8 @@ for my $t (@$data) {
   next if ! $t->{lang} || $t->{skip};
 
   # Array-context split_designator
-  my ($before, $des, $after, $normalised_des) = $bcd->split_designator($t->{name}, lang => $lang);
-
-  if (! $only || ($only >= $i && $only <= $i+4)) {
+  if (! $only || ($only >= $i && $only < $i+4)) {
+    my ($before, $des, $after, $normalised_des) = $bcd->split_designator($t->{name}, lang => $lang);
     is($before, $t->{name}, "(array) $t->{name}: before ok: $before");
     is($des, '', "(array) $t->{name} designator ok: " . ($des // 'undef'));
     is($normalised_des, '', "(array) $t->{name} normalised_des ok: " . ($normalised_des // 'undef'));
@@ -41,8 +40,8 @@ for my $t (@$data) {
   $i += 4;
 
   # Scalar-context split_designator
-  my $res = $bcd->split_designator($t->{name}, lang => $lang);
-  if (! $only || ($only >= $i && $only <= $i+4)) {
+  if (! $only || ($only >= $i && $only < $i+4)) {
+    my $res = $bcd->split_designator($t->{name}, lang => $lang);
     is($res->before, $t->{name}, "(scalar) $t->{name}: before ok: " . $res->before);
     is($res->designator, '', "(scalar) $t->{name} designator ok: " . ($res->designator // 'undef'));
     is($res->designator_std, '', "(scalar) $t->{name} designator_std ok: " . ($res->designator_std // 'undef'));

@@ -145,12 +145,14 @@ sub _build_regex {
     $lang_re = qr/^($lang_str)$/;
   }
 
+  my $count = 0;
   while (my ($long, $entry) = each %{ $self->data }) {
     # If $type is begin, restrict to 'lead' entries
     next if $type eq 'begin' && ! $entry->{lead};
     # If $lang is set, restrict to entries that include $lang
     next if $lang_re && $entry->{lang} !~ $lang_re;
 
+    $count++;
     my $long_nfd = NFD($long);
     $self->_add_to_assembler($assembler, $long_nfd);
 
@@ -163,6 +165,9 @@ sub _build_regex {
       }
     }
   }
+
+  # If no entries found (a strange/bogus language?), return undef
+  return if $count == 0;
 
   return wantarray ? ( $assembler->re, $assembler ) : $assembler->re;
 }
@@ -240,25 +245,26 @@ sub split_designator {
   my ($re, $assembler) = $self->regex('end', $lang);
   my ($lead_re, $lead_assembler) = $self->regex('begin', $lang);
 
-  # Handle older perls without XPosixPunct
-  my $punct_class = eval { '' =~ m/\p{XPosixPunct}/ } ? qr/\p{XPosixPunct}*/ : qr/\p{PosixPunct}*/;
+  if ($re) {
+    # Handle older perls without XPosixPunct
+    my $punct_class = eval { '' =~ m/\p{XPosixPunct}/ } ? qr/\p{XPosixPunct}*/ : qr/\p{PosixPunct}*/;
 
-  # Designators are usually final, so try that first
-  if ($company_name_match =~ m/^\s*(.*?)${punct_class}\s+($re)\s*$/) {
-    return $self->_split_designator_result($1, $2, undef, $assembler->source($^R));
+    # Designators are usually final, so try that first
+    if ($company_name_match =~ m/^\s*(.*?)${punct_class}\s+($re)\s*$/) {
+      return $self->_split_designator_result($1, $2, undef, $assembler->source($^R));
+    }
+    # Not final - check for a lead designator instead (e.g. RU, NL, etc.)
+    elsif ($lead_re && $company_name_match =~ m/^\s*($lead_re)${punct_class}\s*(.*?)\s*$/) {
+      return $self->_split_designator_result(undef, $1, $2, $lead_assembler->source($^R));
+    }
+    # Not final - check for an embedded designator with trailing content
+    elsif ($company_name_match =~ m/(.*?)${punct_class}\s+($re)(?:\s+(.*?))?$/) {
+      return $self->_split_designator_result($1, $2, $3, $assembler->source($^R));
+    }
   }
-  # Not final - check for a lead designator instead (e.g. RU, NL, etc.)
-  elsif ($company_name_match =~ m/^\s*($lead_re)${punct_class}\s*(.*?)\s*$/) {
-    return $self->_split_designator_result(undef, $1, $2, $lead_assembler->source($^R));
-  }
-  # Not final - check for an embedded designator with trailing content
-  elsif ($company_name_match =~ m/(.*?)${punct_class}\s+($re)(?:\s+(.*?))?$/) {
-    return $self->_split_designator_result($1, $2, $3, $assembler->source($^R));
-  }
+
   # No match - return $company_name unchanged
-  else {
-    return $self->_split_designator_result($company_name);
-  }
+  return $self->_split_designator_result($company_name);
 }
 
 1;
