@@ -240,16 +240,20 @@ sub split_designator {
   my ($re, $assembler) = $self->regex('end', $lang);
   my ($lead_re, $lead_assembler) = $self->regex('begin', $lang);
 
+  # Handle older perls without XPosixPunct
+  my $punct_class = eval { qr/\p{XPosixPunct}*/ };
+  $punct_class ||= qr/\p{PosixPunct}*/;
+
   # Designators are usually final, so try that first
-  if ($company_name_match =~ m/^\s*(.*?)\p{XPosixPunct}*\s+($re)\s*$/) {
+  if ($company_name_match =~ m/^\s*(.*?)${punct_class}\s+($re)\s*$/) {
     return $self->_split_designator_result($1, $2, undef, $assembler->source($^R));
   }
   # Not final - check for a lead designator instead (e.g. RU, NL, etc.)
-  elsif ($company_name_match =~ m/^\s*($lead_re)\p{XPosixPunct}*\s*(.*?)\s*$/) {
+  elsif ($company_name_match =~ m/^\s*($lead_re)${punct_class}\s*(.*?)\s*$/) {
     return $self->_split_designator_result(undef, $1, $2, $lead_assembler->source($^R));
   }
   # Not final - check for an embedded designator with trailing content
-  elsif ($company_name_match =~ m/(.*?)\p{XPosixPunct}*\s+($re)(?:\s+(.*?))?$/) {
+  elsif ($company_name_match =~ m/(.*?)${punct_class}\s+($re)(?:\s+(.*?))?$/) {
     return $self->_split_designator_result($1, $2, $3, $assembler->source($^R));
   }
   # No match - return $company_name unchanged
