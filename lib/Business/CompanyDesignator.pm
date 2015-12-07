@@ -241,8 +241,7 @@ sub split_designator {
   my ($lead_re, $lead_assembler) = $self->regex('begin', $lang);
 
   # Handle older perls without XPosixPunct
-  my $punct_class = eval { qr/\p{XPosixPunct}*/ };
-  $punct_class ||= qr/\p{PosixPunct}*/;
+  my $punct_class = eval { '' =~ m/\p{XPosixPunct}/ } ? qr/\p{XPosixPunct}*/ : qr/\p{PosixPunct}*/;
 
   # Designators are usually final, so try that first
   if ($company_name_match =~ m/^\s*(.*?)${punct_class}\s+($re)\s*$/) {
