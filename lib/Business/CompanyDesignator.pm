@@ -17,7 +17,7 @@ use Carp;
 use Business::CompanyDesignator::Record;
 use Business::CompanyDesignator::SplitResult;
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 has 'datafile' => ( is => 'ro', default => sub {
   # Development/test version
