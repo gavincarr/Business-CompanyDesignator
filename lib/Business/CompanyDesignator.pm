@@ -137,11 +137,19 @@ sub _build_regex {
   # RA constructor - case insensitive, with match tracking
   my $assembler = Regexp::Assemble->new->flags('i')->track(1);
 
+  # Construct language regex if $lang is set
+  my $lang_re;
+  if ($lang) {
+    $lang = [ $lang ] if ! ref $lang;
+    my $lang_str = join '|', sort @$lang;
+    $lang_re = qr/^($lang_str)$/;
+  }
+
   while (my ($long, $entry) = each %{ $self->data }) {
     # If $type is begin, restrict to 'lead' entries
     next if $type eq 'begin' && ! $entry->{lead};
     # If $lang is set, restrict to entries that include $lang
-    next if $lang && $entry->{lang} ne $lang;
+    next if $lang_re && $entry->{lang} !~ $lang_re;
 
     my $long_nfd = NFD($long);
     $self->_add_to_assembler($assembler, $long_nfd);
@@ -166,8 +174,22 @@ sub regex {
   my ($type, $lang) = @_;
   $type ||= 'end';
 
+  # $lang might be an arrayref containing multiple language codes
+  my $lang_key;
+  if ($lang) {
+    $lang_key = $lang;
+    if (ref $lang && ref $lang eq 'ARRAY' && @$lang) {
+      if (@$lang == 1) {
+        $lang_key = $lang->[0];
+      }
+      else {
+        $lang_key = join '_', sort map { lc $_ } @$lang;
+      }
+    }
+  }
+
   my $cache_key = $type;
-  $cache_key .= "_$lang" if $lang;
+  $cache_key .= "_$lang_key" if $lang_key;
 
   if (my $entry = $self->regex_cache->{ $cache_key }) {
     return wantarray ? @$entry : $entry->[0];
@@ -372,7 +394,9 @@ designator's type.
 
 Returns a regex for all matching designators for $type ('begin'/'end') and
 $lang (iso 639-1 language code e.g. 'en', 'es', de', etc.) from the dataset.
-The regex is case-insensitive and non-anchored.
+$lang may be either a single language code scalar, or an arrayref of language
+codes, for multiple alternative languages. The returned regex is case-insensitive
+and non-anchored.
 
 $type defaults to 'end', so without parameters regex() returns a regex
 matching all designators for all languages.
@@ -390,7 +414,7 @@ standardised version of the designator as a fourth element.
 In scalar context split_designator returns a L<Business::CompanyDesignator::SplitResult>
 object.
 
-  $res = $bcd->split_designator($company_name);
+  $res = $bcd->split_designator($company_name, lang => $lang);
 
 The initial $des designator (or $res->designator)  is the designator text as
 matched in $company_name, while the final $des_std in array context (or
@@ -402,10 +426,11 @@ would find in designators() or would lookup with records(). Similarly,
 "Accessoires XYZ Ltee" (without the french acute) would match, returning
 "Ltee" (as found) for the $designator, but "Ltée" as the standardised form.
 
-split_designator also accepts an optional 'lang' parameter, which would be
-the ISO 639-1 language code for $company_name. If this is given,
-split_designator will only match designators for that language, which can
-improve the accuracy of the split.
+split_designator also accepts an optional 'lang' parameter, which defines
+one or more ISO 639-1 language codes for $company_name (can be either a single
+scalar language code, or an arrayref of alternate language codes). If $lang is
+defined, split_designator will only match designators for those languages, which
+can improve the accuracy of the split.
 
 Note that split_designator won't always get the split right. It checks for
 final designators first, then leading ones, and then finally looks for embedded
@@ -420,8 +445,8 @@ but it can also detect designators that are false positives e.g.
 
     Dr S L Ledingham - Beaumont Street Practice
 
-One way to reduce this is to specify the optional 'lang' parameter if you know
-the language your company names are in. This should reduce the number of false
+One way to mitigate this is to specify the optional 'lang' parameter if you know
+the language(s) your company names are in. This should reduce the number of false
 positives by making fewer designators available to match on, but it doesn't
 eliminate the issue altogether.
 

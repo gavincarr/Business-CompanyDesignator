@@ -188,7 +188,9 @@
   before: Epithelix
   des: SàRL
   des_std: SàRL
-  lang: fr
+  lang:
+    - en
+    - fr
 -
   name: OKG ehf
   before: OKG
@@ -212,7 +214,9 @@
   before: Chattanooga Endoscopy
   des: ASC LLC
   des_std: ASC L.L.C.
-  lang: en
+  lang:
+    - en
+    - fr
 -
   name: BP p.l.c.
   before: BP
