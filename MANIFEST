@@ -14,6 +14,7 @@ t/06_records.t
 t/10_split_designator.t
 t/11_split_designator_with_lang.t
 t/12_split_designator_diff_lang.t
+t/13_split_designator_allow_embedded.t
 t/90_data.t
 t/manifest.t
 t/pod-coverage.t

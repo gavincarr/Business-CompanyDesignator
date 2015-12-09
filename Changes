@@ -1,5 +1,8 @@
 Revision history for perl module Business::CompanyDesignator
 
+0.10   2015-12-09
+    * Add allow_embedded => 1|0 parameter to skip_designator.
+
 0.09   2015-12-08
     * Refactor split_designator to skip matches if no regexes found.
     * Workaround perls < 5.14 not having XPosixPunct regex char class.

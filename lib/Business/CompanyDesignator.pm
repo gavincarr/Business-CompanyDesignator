@@ -17,7 +17,7 @@ use Carp;
 use Business::CompanyDesignator::Record;
 use Business::CompanyDesignator::SplitResult;
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 has 'datafile' => ( is => 'ro', default => sub {
   # Development/test version
@@ -282,7 +282,7 @@ company designators appended to company names
 
 =head1 VERSION
 
-Version: 0.09.
+Version: 0.10.
 
 This module is considered an B<ALPHA> release. Interfaces may change and/or break
 without notice until the module reaches version 1.0.
