@@ -240,6 +240,8 @@ sub split_designator {
   my $self = shift;
   my ($company_name, %arg) = @_;
   my $lang = $arg{lang};
+  my $allow_embedded = $arg{allow_embedded};
+  $allow_embedded //= 1;    # backwards-compatibility, unfortunately
   my $company_name_match = NFD($company_name);
 
   my ($re, $assembler) = $self->regex('end', $lang);
@@ -258,7 +260,7 @@ sub split_designator {
       return $self->_split_designator_result(undef, $1, $2, $lead_assembler->source($^R));
     }
     # Not final - check for an embedded designator with trailing content
-    elsif ($company_name_match =~ m/(.*?)${punct_class}\s+($re)(?:\s+(.*?))?$/) {
+    elsif ($allow_embedded && $company_name_match =~ m/(.*?)${punct_class}\s+($re)(?:\s+(.*?))?$/) {
       return $self->_split_designator_result($1, $2, $3, $assembler->source($^R));
     }
   }
@@ -280,11 +282,10 @@ company designators appended to company names
 
 =head1 VERSION
 
-Version: 0.08.
+Version: 0.09.
 
 This module is considered an B<ALPHA> release. Interfaces may change and/or break
 without notice until the module reaches version 1.0.
-
 
 =head1 SYNOPSIS
 
@@ -349,7 +350,7 @@ for instance, looks like this:
     lang: en
 
 Long designators are unique across the dataset, but abbreviations are not
-e.g. 'Inc.' is used for both "Incorporated" and "Incorporée".
+e.g. 'Inc.' is used for both "Incorporated" and French "Incorporée".
 
 =head1 METHODS
 
@@ -410,7 +411,7 @@ and non-anchored.
 $type defaults to 'end', so without parameters regex() returns a regex
 matching all designators for all languages.
 
-=head2 split_designator($company_name)
+=head2 split_designator($company_name, [lang => $lang], [allow_embedded => $bool])
 
 Attempts to split $company_name on (the first) company designator found.
 
@@ -425,40 +426,67 @@ object.
 
   $res = $bcd->split_designator($company_name, lang => $lang);
 
-The initial $des designator (or $res->designator)  is the designator text as
-matched in $company_name, while the final $des_std in array context (or
-$res->designator_std) is the standardised version as found in the dataset.
+The $des designator in array context, and the SplitResult $res->designator
+is the designator text as it matched in $company_name, while the array context
+$des_std, and the SplitResult $res->designator_std is the standardised version
+as found in the dataset.
 
 For instance, "ABC Pty Ltd" would return "Pty Ltd" as the $designator, but
 "Pty. Ltd." as the stardardised form, and the latter would be what you
 would find in designators() or would lookup with records(). Similarly,
 "Accessoires XYZ Ltee" (without the french acute) would match, returning
-"Ltee" (as found) for the $designator, but "Ltée" as the standardised form.
+"Ltee" (as found) for the $designator, but "Ltée" (with the acute) as the
+standardised form.
 
-split_designator also accepts an optional 'lang' parameter, which defines
-one or more ISO 639-1 language codes for $company_name (can be either a single
-scalar language code, or an arrayref of alternate language codes). If $lang is
-defined, split_designator will only match designators for those languages, which
-can improve the accuracy of the split.
+split_designator accepts the following optional (named) parameters:
 
-Note that split_designator won't always get the split right. It checks for
+=over 4
+
+=item lang => $lang
+
+$lang can be a scalar ISO 639-1 language code ('en', 'fr', 'cn', etc.), or an
+arrayref containing multiple language codes. If $lang is defined, split_designator
+will only match designators for the specified set of languages, which can improve
+the accuracy of the split by reducing false positive matches.
+
+=item allow_embedded => $boolean
+
+allow_embedded is a boolean indicating whether or not designators can occur in
+the middle of strings, instead of only at the beginning or end. Defaults to true,
+for backwards compatibility, which yields more matches, but also more false
+positives. Setting to false is safer, but yields fewer matches (and embedded
+designators do occur surprisingly often in the wild.)
+
+For more discussion, see L<AMBIGUITIES> below.
+
+=back
+
+=head2 AMBIGUITIES
+
+Note that split_designator does not always get the split right. It checks for
 final designators first, then leading ones, and then finally looks for embedded
-designators. This allows names like these to picked up:
+designators (if allow_embedded is set to true).
+
+Leading and trailing designators are usually reasonably accurate, but embedded
+designators are problematic. For instance, embedded designators allow names like
+these to split correctly:
 
     Amerihealth Insurance Company of NJ
     Trenkwalder Personal AG Schweiz
     Vicente Campano S L (COMERCIAL VICAM)
     Gvozdika, gostinitsa OOO ""Eko-Treyd""
 
-but it can also detect designators that are false positives e.g.
+but it will also wrongly split names like the following:
 
-    Dr S L Ledingham - Beaumont Street Practice
+    XYZ PC Repairs ('PC' is a designator meaning 'Professional Corporation')
+    Dr S L Ledingham ('S L' is a Spanish designator for 'Sociedad Limitada')
 
-One way to mitigate this is to specify the optional 'lang' parameter if you know
-the language(s) your company names are in. This should reduce the number of false
-positives by making fewer designators available to match on, but it doesn't
-eliminate the issue altogether.
-
+If you do want to allow splitting on embedded designators, you might want to pass
+a 'lang' parameter to split_designator if you know the language(s) used for your
+company names, as this will reduce the number of false positives by restricting the
+set of designators matched against. It won't eliminate the issue altogether though,
+so some post-processing might be required. (And I'd love to hear of ideas on how
+to improve this.)
 
 =head1 SEE ALSO
 
