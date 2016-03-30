@@ -378,3 +378,15 @@
   lang: en
   skip_unless_lang: 1
   position: none
+-
+  name: Sears Roebuck And Co.
+  before: Sears Roebuck
+  position: end
+  des: And Co.
+  des_std: and Co.
+-
+  name: 'Sears Roebuck & Co.'
+  before: Sears Roebuck
+  position: end
+  des: '& Co.'
+  des_std: '& Co.'
