@@ -34,6 +34,7 @@ Berhad:
 Besloten vennootschap:
   abbr: B.V.
   lang: nl
+  lead: 1
 'Besloten vennootschap met beperkte aansprakelijkheid':
   abbr: B.V.B.A.
   lang: nl
@@ -52,6 +53,7 @@ Company:
     - Co.
     - '& Co.'
     - and Co.
+    - and Company
   lang: en
 Cooperativa de Responsabilidade Limitada:
   abbr: CRL
@@ -94,6 +96,7 @@ eingetragene Verein:
 'Eenpersoons besloten vennootschap met beperkte aansprakelijkheid':
   abbr: E.B.V.B.A.
   lang: nl
+  lead: 1
 'Gesellschaft mit beschränkter Haftung':
   abbr:
     - GmbH
@@ -110,6 +113,7 @@ eingetragene Verein:
     - ГУП
     - GUP
   lang: ru
+  lead: 1
 Handelsbolag:
   abbr: HB
   lang: se
@@ -133,6 +137,7 @@ Incorporated:
     - ИП
     - IP
   lang: ru
+  lead: 1
 'Julkinen osakeyhtiö':
   abbr: Oyj
   lang: fi
@@ -242,11 +247,13 @@ Limited Liability Limited Partnership:
 Maatschap:
   abbr: Mts
   lang: nl
+  lead: 1
 Naamloze vennootschap:
   abbr:
     - N.V.
     - N.V. Nv
   lang: nl
+  lead: 1
 National Association:
   abbr:
     - N.A.
@@ -283,6 +290,7 @@ offene Handelsgesellschaft:
     - ОАО
     - OAO
   lang: ru
+  lead: 1
 Partnerschaftsgesellschaft:
   abbr: PartG
   lang: de
@@ -499,6 +507,7 @@ Unlimited Proprietary:
 Vereniging zonder winstoogmerk:
   abbr: VZW
   lang: nl
+  lead: 1
 Vereinigung ohne Gewinnerzielungsabsicht:
   abbr: VoG
   lang: de
