@@ -379,14 +379,44 @@
   skip_unless_lang: 1
   position: none
 -
+  name: Sears Roebuck and Company
+  before: Sears Roebuck
+  lang: en
+  position: end
+  des: and Company
+  des_std: and Company
+-
   name: Sears Roebuck And Co.
   before: Sears Roebuck
+  lang: en
   position: end
   des: And Co.
   des_std: and Co.
 -
   name: 'Sears Roebuck & Co.'
   before: Sears Roebuck
+  lang: en
   position: end
   des: '& Co.'
   des_std: '& Co.'
+-
+  name: 'Hakuyosha   Company   Ltd.'
+  before: Hakuyosha
+  lang: en
+  position: end
+  des: Company   Ltd.
+  des_std: Company Ltd.
+-
+  name: 'Hakuyosha Company, Ltd.'
+  before: Hakuyosha
+  lang: en
+  position: end
+  des: Company, Ltd.
+  des_std: Company Ltd.
+-
+  name: 'Hakuyosha Co.,Ltd.'
+  before: Hakuyosha
+  lang: en
+  position: end
+  des: Co.,Ltd.
+  des_std: Co. Ltd.

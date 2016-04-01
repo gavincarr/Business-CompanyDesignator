@@ -113,6 +113,8 @@ sub _add_to_assembler {
   my @pattern = map {
     # Periods are treated as optional literals, with optional trailing commas and/or whitespace
     /\./   ? '\\.?,?\\s*?' :
+    # Embedded spaces can be multiple, and include leading commas
+    / /    ? ',?\s+' :
     # Escape other regex metacharacters
     /[()]/ ? "\\$_" : $_
   } split //, $string;
@@ -214,6 +216,9 @@ sub _split_designator_result {
   if ($matched_pattern) {
     $des_std = $self->pattern_string_map->{$matched_pattern}
       or die "Cannot find matched pattern '$matched_pattern' in pattern_string_map";
+    # Always coalesce spaces and delete commas from $des_std
+    $des_std =~ s/,+/ /g;
+    $des_std =~ s/\s\s+/ /g;
   }
 
   # Legacy interface - return a simple before / des / after tuple, plus $des_std
