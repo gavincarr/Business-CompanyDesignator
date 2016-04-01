@@ -4,6 +4,12 @@ Business::CompanyDesignator is a perl module for matching and
 stripping company designators (like Limited, Ltd., LLC, GmbH, etc.)
 appended to company names.
 
+It uses the company designator dataset from here:
+
+  L<https://github.com/ProfoundNetworks/company_designator>
+
+which is bundled with the module. You can use your own (updated or custom)
+version, if you prefer.
 
 ## INSTALLATION
 
@@ -26,7 +32,7 @@ perldoc command.
 
 ## LICENSE AND COPYRIGHT
 
-Copyright (C) 2013 Gavin Carr.
+Copyright (C) 2013-2016 Gavin Carr.
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of either: the GNU General Public License as published

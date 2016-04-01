@@ -1,5 +1,8 @@
 Revision history for perl module Business::CompanyDesignator
 
+0.11   2016-04-01
+    * Update split_designator to handle multiple spaces and leading commas in designators.
+
 0.10   2015-12-09
     * Add allow_embedded => 1|0 parameter to skip_designator.
 

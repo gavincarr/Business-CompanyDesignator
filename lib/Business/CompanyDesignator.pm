@@ -17,7 +17,7 @@ use Carp;
 use Business::CompanyDesignator::Record;
 use Business::CompanyDesignator::SplitResult;
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 has 'datafile' => ( is => 'ro', default => sub {
   # Development/test version
@@ -287,9 +287,9 @@ company designators appended to company names
 
 =head1 VERSION
 
-Version: 0.10.
+Version: 0.11.
 
-This module is considered an B<ALPHA> release. Interfaces may change and/or break
+This module is considered a B<BETA> release. Interfaces may change and/or break
 without notice until the module reaches version 1.0.
 
 =head1 SYNOPSIS
@@ -503,7 +503,7 @@ Gavin Carr <gavin@profound.net>
 
 =head1 COPYRIGHT AND LICENCE
 
-Copyright (C) 2013-2015 Gavin Carr
+Copyright (C) 2013-2016 Gavin Carr
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.
