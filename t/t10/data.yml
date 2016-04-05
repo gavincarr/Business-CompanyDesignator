@@ -420,3 +420,15 @@
   position: end
   des: Co.,Ltd.
   des_std: Co. Ltd.
+-
+  name: 2Connect W.L.L.
+  before: 2Connect
+  position: end
+  des: W.L.L.
+  des_std: W.L.L.
+-
+  name: 2Connect WLL
+  before: 2Connect
+  position: end
+  des: WLL
+  des_std: W.L.L.
