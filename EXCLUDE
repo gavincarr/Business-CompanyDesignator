@@ -1,3 +1,4 @@
 Business-CompanyDesignator*/CompanyDesignator.pm
+share/Rakefile
 share/company_designator_pl.yml
 share/company_designator_upstream.yml
