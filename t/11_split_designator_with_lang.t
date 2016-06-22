@@ -24,7 +24,7 @@ ok($bcd_data = $bcd->data, 'data method ok');
 
 my $i = 3;
 for my $t (@$data) {
-  die dump($t) if ! $t->{lang};
+  die "Entry has no 'lang' attribute: " . dump($t) if ! $t->{lang};
   next if $t->{skip};
 
   my $exp_before    = $t->{before}  // '';

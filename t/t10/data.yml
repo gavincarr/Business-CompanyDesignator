@@ -381,54 +381,56 @@
 -
   name: Sears Roebuck and Company
   before: Sears Roebuck
-  lang: en
-  position: end
   des: and Company
   des_std: and Company
+  lang: en
+  position: end
 -
   name: Sears Roebuck And Co.
   before: Sears Roebuck
-  lang: en
-  position: end
   des: And Co.
   des_std: and Co.
+  lang: en
+  position: end
 -
   name: 'Sears Roebuck & Co.'
   before: Sears Roebuck
-  lang: en
-  position: end
   des: '& Co.'
   des_std: '& Co.'
+  lang: en
+  position: end
 -
   name: 'Hakuyosha   Company   Ltd.'
   before: Hakuyosha
-  lang: en
-  position: end
   des: Company   Ltd.
   des_std: Company Ltd.
+  lang: en
+  position: end
 -
   name: 'Hakuyosha Company, Ltd.'
   before: Hakuyosha
-  lang: en
-  position: end
   des: Company, Ltd.
   des_std: Company Ltd.
+  lang: en
+  position: end
 -
   name: 'Hakuyosha Co.,Ltd.'
   before: Hakuyosha
-  lang: en
-  position: end
   des: Co.,Ltd.
   des_std: Co. Ltd.
+  lang: en
+  position: end
 -
   name: 2Connect W.L.L.
   before: 2Connect
-  position: end
   des: W.L.L.
   des_std: W.L.L.
+  lang: en
+  position: end
 -
   name: 2Connect WLL
   before: 2Connect
-  position: end
   des: WLL
   des_std: W.L.L.
+  lang: en
+  position: end
