@@ -434,3 +434,10 @@
   des_std: W.L.L.
   lang: en
   position: end
+-
+  name: CVS Pharmacy
+  before: CVS Pharmacy
+  des: ~
+  des_std: ~
+  lang: en
+  position: none
