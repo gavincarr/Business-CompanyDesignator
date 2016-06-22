@@ -1,5 +1,8 @@
 Revision history for perl module Business::CompanyDesignator
 
+0.12   2016-06-22
+    * Update split_designator to require punct or space after lead regex.
+
 0.11   2016-04-01
     * Update split_designator to handle multiple spaces and leading commas in designators.
 
