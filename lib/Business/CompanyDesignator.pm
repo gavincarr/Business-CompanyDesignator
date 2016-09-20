@@ -250,7 +250,7 @@ sub split_designator {
   my $company_name_match = NFD($company_name);
 
   # Handle older perls without XPosixPunct
-  state $punct_class = eval { '.' =~ m/\p{XPosixPunct}/ } ? '[\s\p{XPosixPunct}]' : '[\s[[:punct:]]]';
+  state $punct_class = eval { '.' =~ m/\p{XPosixPunct}/ } ? '[\s\p{XPosixPunct}]' : '[\s[:punct:]]';
 
   my ($re, $assembler) = $self->regex('end', $lang);
   my ($lead_re, $lead_assembler) = $self->regex('begin', $lang);
