@@ -250,24 +250,22 @@ sub split_designator {
   my $company_name_match = NFD($company_name);
 
   # Handle older perls without XPosixPunct
-  state $punct_class = eval { '.' =~ m/\p{XPosixPunct}/ } ? '\p{XPosixPunct}' : '[[:punct:]]';
+  state $punct_class = eval { '.' =~ m/\p{XPosixPunct}/ } ? '[\s\p{XPosixPunct}]' : '[\s[[:punct:]]]';
 
   my ($re, $assembler) = $self->regex('end', $lang);
   my ($lead_re, $lead_assembler) = $self->regex('begin', $lang);
-  # For leading designators, require either trailing punctuation or whitespace
-  my $lead_break = qr/(?:(?<=${punct_class})|\s)/;
 
   if ($re) {
     # Designators are usually final, so try that first
-    if ($company_name_match =~ m/^\s*(.*?)${punct_class}*\s+($re)\s*$/) {
+    if ($company_name_match =~ m/^\s*(.*?)${punct_class}\s*($re)\s*$/) {
       return $self->_split_designator_result($1, $2, undef, $assembler->source($^R));
     }
     # Not final - check for a lead designator instead (e.g. RU, NL, etc.)
-    elsif ($lead_re && $company_name_match =~ m/^\s*($lead_re)${punct_class}*${lead_break}\s*(.*?)\s*$/) {
+    elsif ($lead_re && $company_name_match =~ m/^\s*($lead_re)${punct_class}\s*(.*?)\s*$/) {
       return $self->_split_designator_result(undef, $1, $2, $lead_assembler->source($^R));
     }
     # Not final - check for an embedded designator with trailing content
-    elsif ($allow_embedded && $company_name_match =~ m/(.*?)${punct_class}*\s+($re)(?:\s+(.*?))?$/) {
+    elsif ($allow_embedded && $company_name_match =~ m/(.*?)${punct_class}\s*($re)(?:\s+(.*?))?$/) {
       return $self->_split_designator_result($1, $2, $3, $assembler->source($^R));
     }
   }
