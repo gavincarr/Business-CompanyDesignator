@@ -441,3 +441,31 @@
   des_std: ~
   lang: en
   position: none
+-
+  name: Interstate Hotels & Resorts, Inc
+  before: Interstate Hotels & Resorts
+  des: Inc
+  des_std: Inc.
+  lang: en
+  position: end
+-
+  name: Interstate Hotels & Resorts,Inc
+  before: Interstate Hotels & Resorts
+  des: Inc
+  des_std: Inc.
+  lang: en
+  position: end
+-
+  name: E.S.E. Hospital Cumbal
+  after: Hospital Cumbal
+  des: E.S.E.
+  des_std: E.S.E.
+  lang: es
+  position: begin
+-
+  name: Hospital San Vicente de Arauca E.S.E.
+  before: Hospital San Vicente de Arauca
+  des: E.S.E.
+  des_std: E.S.E.
+  lang: es
+  position: end
