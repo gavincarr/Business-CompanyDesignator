@@ -469,3 +469,17 @@
   des_std: E.S.E.
   lang: es
   position: end
+-
+  name: Société Générale SA
+  before: Société Générale
+  des: SA
+  des_std: SA
+  lang: fr
+  position: end
+-
+  name: Société Générale S.A.
+  before: Société Générale
+  des: SA
+  des_std: SA
+  lang: fr
+  position: end
