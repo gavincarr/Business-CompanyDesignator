@@ -39,12 +39,15 @@ for my $t (@$data) {
   my $extra         = $exp_before ? ($exp_after || '') : '';
 
   # Array-context split_designator
-  my ($before, $des, $after, $normalised_des) = $bcd->split_designator($t->{name});
+  my ($before, $des, $after, $des_std) = $bcd->split_designator($t->{name});
 
   if (! $only || ($only >= $i && $only <= $i+2)) {
     is($before, $exp_before, "(array) $t->{name}: before ok: $before");
     is($des, $exp_des, "(array) $t->{name} designator ok: " . ($des // 'undef'));
-    is($normalised_des, $exp_des_std, "(array) $t->{name} normalised_des ok: " . ($normalised_des // 'undef'));
+    # If $des_std is undef, then it's ambiguous and we should skip this test
+    if ($des_std) {
+      is($des_std, $exp_des_std, "(array) $t->{name} designator_std ok: " . ($des_std // 'undef'));
+    }
   }
   $i += 3;
   if ($exp_after || $after) {
@@ -54,9 +57,9 @@ for my $t (@$data) {
     $i += 1;
   }
 
-  # Test that $normalised_des maps back to one or more records
-  if ($normalised_des) {
-    my @records = $bcd->records($normalised_des);
+  # Test that $des_std maps back to one or more records
+  if ($des_std) {
+    my @records = $bcd->records($des_std);
     if (! $only || $only == $i) {
       ok(scalar @records, 'records returned ' . scalar(@records) . ' record(s): '
         . join(',', map { $_->long } @records));
@@ -69,7 +72,10 @@ for my $t (@$data) {
   if (! $only || ($only >= $i && $only <= $i+4)) {
     is($res->before, $exp_before, "(scalar) $t->{name}: before ok: " . $res->before);
     is($res->designator, $exp_des // '', "(scalar) $t->{name} designator ok: " . ($res->designator // 'undef'));
-    is($res->designator_std, $exp_des_std // '', "(scalar) $t->{name} designator_std ok: " . ($res->designator_std // 'undef'));
+    # If $des_std is undef, then it's ambiguous and we should skip this test
+    if ($res->designator_std) {
+      is($res->designator_std, $exp_des_std // '', "(scalar) $t->{name} designator_std ok: " . ($res->designator_std // 'undef'));
+    }
     is($res->short_name, $short_name, "(scalar) $t->{name} short_name ok: " . $res->short_name);
     is($res->extra, $extra, "(scalar) $t->{name} extra ok: " . $res->extra);
   }
@@ -91,11 +97,11 @@ for my $t (@$data) {
 }
 
 for my $company_name (@bad) {
-  my ($before, $des, $after, $normalised_des) = $bcd->split_designator($company_name);
+  my ($before, $des, $after, $des_std) = $bcd->split_designator($company_name);
   if (! $only || ($only >= $i && $only <= $i+2)) {
     is($before, $company_name, "non-matching $company_name: before is company name");
     is($des, '', "non-matching $company_name: designator undef");
-    is($normalised_des, '', "non-matching $company_name: normalised_des undef");
+    is($des_std, '', "non-matching $company_name: designator_std undef");
   }
   $i += 3;
 }
