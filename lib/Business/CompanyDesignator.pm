@@ -42,6 +42,8 @@ has 'abbr_long_map' => ( is => 'ro', isa => 'HashRef', lazy_build => 1 );
 # pattern_string_map is a hash mapping patterns back to their source string,
 # since we do things like add additional patterns without diacritics
 has 'pattern_string_map' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
+# pattern_string_map_lang is a perl-language hash mapping patterns back to their source string
+has 'pattern_string_map_lang' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
 
 sub _build_data {
   my $self = shift;
@@ -102,8 +104,9 @@ sub records {
 
 # Add $string to regex assembler
 sub _add_to_assembler {
-  my ($self, $assembler, $string, $reference_string) = @_;
+  my ($self, $assembler, $lang, $string, $reference_string) = @_;
   $reference_string ||= $string;
+# printf "+ add_to_assembler (%s): '%s' => '%s'\n", join(',', @{ $lang || []}), $string, $reference_string;
 
   # FIXME: RA->add() doesn't work here because of known quantifier-escaping bugs:
   # https://rt.cpan.org/Public/Bug/Display.html?id=50228
@@ -120,14 +123,40 @@ sub _add_to_assembler {
   } split //, $string;
   $assembler->insert(@pattern);
 
-  # Also add pattern => $string mapping to pattern_string_map
-  $self->pattern_string_map->{ join '', @pattern } = $reference_string;
+  # Also add pattern => $string mapping to pattern_string_map and pattern_string_map_lang
+  my $pattern_string = join '', @pattern;
+  # If $pattern_string already exists in pattern_string_map then the pattern is ambiguous
+  # across entries, and we can't unambiguously map back to a standard designator
+  if (exists $self->pattern_string_map->{ $pattern_string }) {
+    my $current = $self->pattern_string_map->{ $pattern_string };
+    if ($current && $current ne $reference_string) {
+      # Reset to undef to mark ambiguity
+      $self->pattern_string_map->{ $pattern_string } = undef;
+    }
+  }
+  else {
+    $self->pattern_string_map->{ $pattern_string } = $reference_string;
+  }
+  if ($lang) {
+    for my $l (@$lang) {
+      if (exists $self->pattern_string_map_lang->{$l}->{ $pattern_string }) {
+        my $current = $self->pattern_string_map_lang->{$l}->{ $pattern_string };
+        if ($current && $current ne $reference_string) {
+          # Reset to undef to mark ambiguity
+          $self->pattern_string_map_lang->{$l}->{ $pattern_string } = undef;
+        }
+      }
+      else {
+        $self->pattern_string_map_lang->{$l}->{ $pattern_string } = $reference_string;
+      }
+    }
+  }
 
   # If $string contains unicode diacritics, also add a version without them for misspellings
   if ($string =~ m/\pM/) {
     my $stripped = $string;
     $stripped =~ s/\pM//g;
-    $self->_add_to_assembler($assembler, $stripped, $string);
+    $self->_add_to_assembler($assembler, $lang, $stripped, $reference_string);
   }
 }
 
@@ -156,14 +185,15 @@ sub _build_regex {
 
     $count++;
     my $long_nfd = NFD($long);
-    $self->_add_to_assembler($assembler, $long_nfd);
+    $self->_add_to_assembler($assembler, $lang, $long_nfd);
 
     # Add all abbreviations
     if (my $abbr_list = $entry->{abbr}) {
       $abbr_list = [ $abbr_list ] if ! ref $abbr_list;
       for my $abbr (@$abbr_list) {
         my $abbr_nfd = NFD($abbr);
-        $self->_add_to_assembler($assembler, $abbr_nfd);
+        my $abbr_std = NFD($entry->{abbr_std} || $abbr);
+        $self->_add_to_assembler($assembler, $lang, $abbr_nfd, $abbr_std);
       }
     }
   }
@@ -210,15 +240,17 @@ sub regex {
 # Helper to return split_designator results
 sub _split_designator_result {
   my $self = shift;
-  my ($before, $des, $after, $matched_pattern) = @_;
+  my ($lang, $before, $des, $after, $matched_pattern) = @_;
 
   my $des_std;
   if ($matched_pattern) {
-    $des_std = $self->pattern_string_map->{$matched_pattern}
-      or die "Cannot find matched pattern '$matched_pattern' in pattern_string_map";
-    # Always coalesce spaces and delete commas from $des_std
-    $des_std =~ s/,+/ /g;
-    $des_std =~ s/\s\s+/ /g;
+    $des_std = $self->pattern_string_map_lang->{$lang}->{$matched_pattern} if $lang;
+    $des_std ||= $self->pattern_string_map->{$matched_pattern};
+    if ($des_std) {
+      # Always coalesce spaces and delete commas from $des_std
+      $des_std =~ s/,+/ /g;
+      $des_std =~ s/\s\s+/ /g;
+    }
   }
 
   # Legacy interface - return a simple before / des / after tuple, plus $des_std
@@ -258,20 +290,20 @@ sub split_designator {
   if ($re) {
     # Designators are usually final, so try that first
     if ($company_name_match =~ m/^\s*(.*?)${punct_class}\s*($re)\s*$/) {
-      return $self->_split_designator_result($1, $2, undef, $assembler->source($^R));
+      return $self->_split_designator_result($lang, $1, $2, undef, $assembler->source($^R));
     }
     # Not final - check for a lead designator instead (e.g. RU, NL, etc.)
     elsif ($lead_re && $company_name_match =~ m/^\s*($lead_re)${punct_class}\s*(.*?)\s*$/) {
-      return $self->_split_designator_result(undef, $1, $2, $lead_assembler->source($^R));
+      return $self->_split_designator_result($lang, undef, $1, $2, $lead_assembler->source($^R));
     }
     # Not final - check for an embedded designator with trailing content
     elsif ($allow_embedded && $company_name_match =~ m/(.*?)${punct_class}\s*($re)(?:\s+(.*?))?$/) {
-      return $self->_split_designator_result($1, $2, $3, $assembler->source($^R));
+      return $self->_split_designator_result($lang, $1, $2, $3, $assembler->source($^R));
     }
   }
 
   # No match - return $company_name unchanged
-  return $self->_split_designator_result($company_name);
+  return $self->_split_designator_result($lang, $company_name);
 }
 
 1;
