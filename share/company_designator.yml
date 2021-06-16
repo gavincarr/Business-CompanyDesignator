@@ -591,9 +591,6 @@ Vennootschap onder firma:
 'Zártkörűen Működő Részvénytársaság':
   abbr: Zrt.
   lang: hu
-'有限公司':
-  doc: Corporate group
-  lang: zh
 '有限责任公司':
   abbr: '有限公司'
   doc: Company with limited liability
