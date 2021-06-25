@@ -113,9 +113,10 @@ sub _add_to_assembler {
   # https://rt.cpan.org/Public/Bug/Display.html?id=74449
   # $assembler->add($string)
   # Workaround by lexing and using insert()
+  my $optional1 = '\\.?,?\\s*';
   my @pattern = map {
     # Periods are treated as optional literals, with optional trailing commas and/or whitespace
-    /\./   ? '\\.?,?\\s*?' :
+    /\./   ? $optional1 :
     # Embedded spaces can be multiple, and include leading commas
     / /    ? ',?\s+' :
     # Escape other regex metacharacters
@@ -125,6 +126,18 @@ sub _add_to_assembler {
 
   # Also add pattern => $string mapping to pattern_string_map and pattern_string_map_lang
   my $pattern_string = join '', @pattern;
+
+  # Special case - optional match characters can cause clashes between
+  # distinct pattern_strings e.g. /A\.?,?\s*S\.?,?\s*/ clashes with /AS/
+  # We need to handle such cases as ambiguous with extra checks
+  my $optional1e = "\Q$optional1\E";
+  my $alt_pattern_string1;
+  if ($pattern_string =~ /^(\w)(\w)$/) {
+    $alt_pattern_string1 = "$1$optional1$2$optional1";
+  } elsif ($pattern_string =~ /^(\w)$optional1e(\w)$optional1e$/) {
+    $alt_pattern_string1 = "$1$2";
+  }
+
   # If $pattern_string already exists in pattern_string_map then the pattern is ambiguous
   # across entries, and we can't unambiguously map back to a standard designator
   if (exists $self->pattern_string_map->{ $pattern_string }) {
@@ -132,6 +145,15 @@ sub _add_to_assembler {
     if ($current && $current ne $reference_string) {
       # Reset to undef to mark ambiguity
       $self->pattern_string_map->{ $pattern_string } = undef;
+    }
+  }
+  # Also check for the existence of $alt_pattern_string1, since this is also an ambiguity
+  elsif ($alt_pattern_string1 && exists $self->pattern_string_map->{ $alt_pattern_string1 }) {
+    my $current = $self->pattern_string_map->{ $alt_pattern_string1 };
+    if ($current && $current ne $reference_string) {
+      # Reset both pairs to undef to mark ambiguity
+      $self->pattern_string_map->{ $pattern_string } = undef;
+      $self->pattern_string_map->{ $alt_pattern_string1 } = undef;
     }
   }
   else {
