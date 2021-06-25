@@ -6,6 +6,7 @@ use utf8;
 use open qw(:std :utf8);
 use Test::More;
 use YAML qw(LoadFile);
+use Encode qw(decode_utf8);
 use Data::Dump qw(dd pp dump);
 
 use FindBin qw($Bin);
@@ -27,7 +28,7 @@ if (@ARGV) {
   if ($ARGV[0] =~ /^\d+$/) {
     $only = $ARGV[0];
   } else {
-    $match = join ' ', @ARGV;
+    $match = join ' ', map { decode_utf8 $_ } @ARGV;
   }
 }
 
