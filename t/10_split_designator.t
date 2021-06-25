@@ -22,7 +22,14 @@ my @bad = (
 my ($bcd, $bcd_data, $records);
 
 # Allow running just a single set of tests
-my $only = @ARGV ? $ARGV[0] : undef;
+my ($only, $match);
+if (@ARGV) {
+  if ($ARGV[0] =~ /^\d+$/) {
+    $only = $ARGV[0];
+  } else {
+    $match = join ' ', @ARGV;
+  }
+}
 
 ok($bcd = Business::CompanyDesignator->new, 'constructor ok');
 ok($bcd_data = $bcd->data, 'data method ok');
@@ -30,6 +37,7 @@ ok($bcd_data = $bcd->data, 'data method ok');
 my $i = 3;
 for my $t (@$data) {
   next if $t->{skip} || $t->{skip_unless_lang};
+  next if $match && $t->{name} !~ /$match/o;
 
   my $exp_before    = $t->{before}  // '';
   my $exp_des       = $t->{des}     // '';
@@ -98,7 +106,7 @@ for my $t (@$data) {
 
 for my $company_name (@bad) {
   my ($before, $des, $after, $des_std) = $bcd->split_designator($company_name);
-  if (! $only || ($only >= $i && $only <= $i+2)) {
+  if (! $match && ! $only || ($only >= $i && $only <= $i+2)) {
     is($before, $company_name, "non-matching $company_name: before is company name");
     is($des, '', "non-matching $company_name: designator undef");
     is($des_std, '', "non-matching $company_name: designator_std undef");
