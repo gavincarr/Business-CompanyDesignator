@@ -29,7 +29,7 @@ has 'datafile' => ( is => 'ro', default => sub {
   return dist_file('Business-CompanyDesignator', 'company_designator.yml');
 });
 
-# data is the raw dataset as loaded from datafile
+# data is the raw dataset as loaded from datafile, keyed by long designator
 has data => ( is => 'ro', lazy_build => 1 );
 
 # regex_cache is a cache of regexes by language and type, since they're expensive to build
@@ -42,7 +42,8 @@ has 'abbr_long_map' => ( is => 'ro', isa => 'HashRef', lazy_build => 1 );
 # pattern_string_map is a hash mapping patterns back to their source string,
 # since we do things like add additional patterns without diacritics
 has 'pattern_string_map' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
-# pattern_string_map_lang is a perl-language hash mapping patterns back to their source string
+# pattern_string_map_lang is a hash of hashes, mapping language codes to hashes
+# of patterns back to their source string
 has 'pattern_string_map_lang' => ( is => 'ro', isa => 'HashRef', default => sub { {} } );
 
 sub _build_data {
@@ -54,6 +55,10 @@ sub _build_abbr_long_map {
   my $self = shift;
   my $map = {};
   while (my ($long, $entry) = each %{ $self->data }) {
+    if (my $abbr = $entry->{abbr_std}) {
+      $map->{$abbr} ||= [];
+      push @{ $map->{$abbr} }, $long;
+    }
     my $abbr_list = $entry->{abbr} or next;
     $abbr_list = [ $abbr_list ] if ! ref $abbr_list;
     for my $abbr (@$abbr_list) {
