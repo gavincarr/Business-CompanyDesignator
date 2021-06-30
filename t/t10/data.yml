@@ -98,6 +98,20 @@
   lang: en
   position: end
 -
+  name: 'SENOPLAST Klepsch und Co GmbH'
+  before: SENOPLAST Klepsch
+  des: 'und Co GmbH'
+  des_std: GmbH
+  lang: de
+  position: end
+-
+  name: 'SENOPLAST Klepsch & Co GmbH'
+  before: SENOPLAST Klepsch
+  des: '& Co GmbH'
+  des_std: GmbH
+  lang: de
+  position: end
+-
   name: Kernkraftwerk Brokdorf GmbH & Co OHG
   before: Kernkraftwerk Brokdorf
   des: GmbH & Co OHG
@@ -108,7 +122,14 @@
   name: Zukunftsbaugesellschaft MBH
   before: Zukunftsbaugesellschaft
   des: MBH
-  des_std: mbH
+  des_std: GmbH
+  lang: de
+  position: end
+-
+  name: AutoCash E-Loading GbR
+  before: AutoCash E-Loading
+  des: GbR
+  des_std: GbR
   lang: de
   position: end
 -
@@ -254,7 +275,7 @@
   name: Chattanooga Endoscopy ASC LLC
   before: Chattanooga Endoscopy
   des: ASC LLC
-  des_std: ASC L.L.C.
+  des_std: LLC
   lang:
     - en
     - fr
@@ -350,6 +371,20 @@
   before: Arniz Asesores
   des: S L P
   des_std: S.L.P.
+  lang: es
+  position: end
+-
+  name: Hotelbeds Spain S.L.U.
+  before: Hotelbeds Spain
+  des: S.L.U.
+  des_std: S.L.U.
+  lang: es
+  position: end
+-
+  name: Hotelbeds Spain SLU
+  before: Hotelbeds Spain
+  des: SLU
+  des_std: S.L.U.
   lang: es
   position: end
 -
@@ -496,4 +531,144 @@
   des: sp.zo.o.
   des_std: Sp.zo.o.
   lang: pl
+  position: end
+-
+  name: Jagdwirtschafts-, Förderungs- und Betriebsges.m.b.H.
+  before: Jagdwirtschafts-, Förderungs- und Betriebsges
+  des: m.b.H.
+  des_std: GmbH
+  lang: de
+  position: end
+-
+  name: ANKOE Service Ges.m.b.H.
+  before: ANKOE Service
+  des: Ges.m.b.H.
+  des_std: GmbH
+  lang: de
+  position: end
+-
+  name: Alpha Medien-Service-Gesellschaft m.b.H.
+  before: Alpha Medien-Service
+  des: Gesellschaft m.b.H.
+  des_std: GmbH
+  lang: de
+  position: end
+-
+  name: Aman Technologies Co. LLC
+  before: Aman Technologies
+  des: Co. LLC
+  des_std: LLC
+  lang: en
+  position: end
+-
+  name: Al-Wasata Securities Co LLC
+  before: Al-Wasata Securities
+  des: Co LLC
+  des_std: LLC
+  lang: en
+  position: end
+-
+  name: A.G. Paphitis and Co LLC
+  before: A.G. Paphitis
+  des: and Co LLC
+  des_std: LLC
+  lang: en
+  position: end
+-
+  name: A.G. Paphitis & Co LLC
+  before: A.G. Paphitis
+  des: '& Co LLC'
+  des_std: LLC
+  lang: en
+  position: end
+-
+  name: ADVANSOFT (L.L.C)
+  before: ADVANSOFT
+  des: LLC
+  des_std: LLC
+  lang: en
+  position: end
+-
+  name: LLC Mary Kay
+  after: Mary Kay
+  des: LLC
+  des_std: LLC
+  lang: en
+  position: begin
+-
+  name: AXA Group Operations Belgium SA/NV
+  before: AXA Group Operations Belgium
+  des: SA/NV
+  des_std: S.A./N.V.
+  lang: nl
+  position: end
+-
+  name: Worldline S.A./N.V.
+  before: Worldline
+  des: S.A./N.V.
+  des_std: S.A./N.V.
+  lang: nl
+  position: end
+-
+  name: Caspian Tech CJSC
+  before: Caspian Tech
+  des: CJSC
+  des_std: CJSC
+  lang: en
+  position: end
+-
+  name: CJSC ABI Group
+  after: ABI Group
+  des: CJSC
+  des_std: CJSC
+  lang: en
+  position: begin
+-
+  name: Bank BelVEB OJSC
+  before: Bank BelVEB
+  des: OJSC
+  des_std: OJSC
+  lang: en
+  position: end
+-
+  name: KARAFARIN BANK - PJSC
+  before: KARAFARIN BANK
+  des: PJSC
+  des_std: PJSC
+  lang: en
+  position: end
+-
+  name: Astra Industrial Group Co. PJSC
+  before: Astra Industrial Group
+  des: Co. PJSC
+  des_std: PJSC
+  lang: en
+  position: end
+-
+  name: PJSC BANK VOSTOK
+  after: BANK VOSTOK
+  des: PJSC
+  des_std: PJSC
+  lang: ru
+  position: begin
+-
+  name: SBA Research gGmbH
+  before: SBA Research
+  des: gGmbH
+  des_std: gGmbH
+  lang: de
+  position: end
+-
+  name: TELEFONICA DE ESPANA S.A.U.
+  before: TELEFONICA DE ESPANA
+  des: S.A.U.
+  des_std: S.A.U.
+  lang: s
+  position: end
+-
+  name: TELEFONICA DE ESPANA SAU
+  before: TELEFONICA DE ESPANA
+  des: SAU
+  des_std: S.A.U.
+  lang: s
   position: end
