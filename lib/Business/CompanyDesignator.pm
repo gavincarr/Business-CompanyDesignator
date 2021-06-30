@@ -269,6 +269,11 @@ sub _split_designator_result {
   my $self = shift;
   my ($lang, $before, $des, $after, $matched_pattern) = @_;
 
+  # $before can end in whitespace (that we don't want to consume in the RE
+  # for technical reasons around handling punctuation like '& Co' in designators)
+  # So trim here to handle that case.
+  $before =~ s/\s+$// if $before;
+
   my $des_std;
   if ($matched_pattern) {
     $des_std = $self->pattern_string_map_lang->{$lang}->{$matched_pattern} if $lang;
