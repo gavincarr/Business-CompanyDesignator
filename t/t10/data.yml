@@ -835,3 +835,11 @@
   lang: ko
   position: begin
   doc: leading Yuhan Hoesa, non-continuous (do we need leading continuous support?)
+-
+  name: شركة سمير محمد اسماعيل عوده للتجاره
+  after:  سمير محمد اسماعيل عوده للتجاره
+  des: شركة
+  des_std: شركة
+  lang: ar
+  position: begin
+  doc: leading basic Company designator

@@ -25,7 +25,6 @@ our %LANG_CONTINUA = map { $_ => 1 } qw(
   zh
   ja
   ko
-  th
 );
 
 has 'datafile' => ( is => 'ro', default => sub {
