@@ -370,7 +370,7 @@ sub split_designator {
   }
 
   # No final or initial - check for an embedded designator with trailing content
-  if ($allow_embedded &&
+  if ($end_re && $allow_embedded &&
       $company_name_match =~ m/(.*?)${punct_class}\s*\(?($end_re)\)?(?:\s+(.*?))?$/) {
     return $self->_split_designator_result($lang, $1, $2, $3, $end_asr->source($^R));
   }
