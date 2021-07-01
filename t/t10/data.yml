@@ -595,6 +595,20 @@
   des_std: LLC
   lang: en
 -
+  name: ADVANSOFT (L. L. C. )
+  before: ADVANSOFT
+  des: 'L. L. C. '
+  des_std: LLC
+  lang: en
+  position: end
+-
+  name: ADVANSOFT L. L. C. 
+  before: ADVANSOFT
+  des: L. L. C.
+  des_std: LLC
+  lang: en
+  position: end
+-
   name: Abdulla & Hamad Al Ghurair Investment (L L C)
   before: Abdulla & Hamad Al Ghurair Investment
   des: L L C
