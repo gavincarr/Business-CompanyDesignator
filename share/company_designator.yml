@@ -305,6 +305,12 @@ offene Handelsgesellschaft:
     - 'GmbH & Co OHG'
     - 'GmbH und Co OHG'
   lang: de
+Open Joint Stock Company:
+  abbr_std: OJSC
+  abbr:
+    - OJSC
+    - Co. OJSC
+  lang: en
 'opinbert hlutafélag':
   abbr: ohf.
   lang: is
