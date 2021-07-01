@@ -24,7 +24,7 @@ our $VERSION = '0.15';
 our %LANG_CONTINUA = map { $_ => 1 } qw(
   zh
   ja
-  kr
+  ko
   th
 );
 
@@ -334,6 +334,9 @@ sub split_designator {
                        '[\s\p{XPosixPunct}]' :
                        '[\s[:punct:]]';
 
+  # Strip all brackets for continuous language matching
+  (my $company_name_match_cont_stripped = $company_name_match) =~ s/[()\x{ff08}\x{ff09}]//g;
+
   my ($end_re, $end_asr, $end_cont_re, $end_cont_asr, $begin_re, $begin_asr);
   if ($lang) {
     if ($LANG_CONTINUA{$lang}) {
@@ -357,7 +360,7 @@ sub split_designator {
   # No final designator - retry without a word break for the subset of languages
   # that use continuous scripts (see %LANG_CONTINUA above)
   if ($end_cont_re &&
-      $company_name_match =~ m/^\s*(.*?)\(?($end_cont_re)\)?\s*$/) {
+      $company_name_match_cont_stripped =~ m/^\s*(.*?)\(?($end_cont_re)\)?\s*$/) {
     return $self->_split_designator_result($lang, $1, $2, undef, $end_cont_asr->source($^R));
   }
 
