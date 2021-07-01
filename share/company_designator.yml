@@ -718,3 +718,7 @@ Vennootschap onder firma:
     - Hapmyoung Hoesa
   doc: general partnership corporation
   lang: ko
+'شركة':
+  doc: Company
+  lang: ar
+  lead: 1
