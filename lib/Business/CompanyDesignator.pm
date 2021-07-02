@@ -17,7 +17,7 @@ use Carp;
 use Business::CompanyDesignator::Record;
 use Business::CompanyDesignator::SplitResult;
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 # Hardcode the set of languages that we treat as 'continuous'
 # i.e. their non-ascii designators don't require a word break
@@ -395,7 +395,7 @@ company designators appended to company names
 
 =head1 VERSION
 
-Version: 0.16.
+Version: 0.17.
 
 This module is considered a B<BETA> release. Interfaces may change and/or break
 without notice until the module reaches version 1.0.
