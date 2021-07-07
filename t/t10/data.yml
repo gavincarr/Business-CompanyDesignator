@@ -1,4 +1,3 @@
----
 -
   name: Open Fusion Pty Ltd
   before: Open Fusion
@@ -246,9 +245,7 @@
   before: Epithelix
   des: SàRL
   des_std: SàRL
-  lang:
-    - en
-    - fr
+  lang: fr
   position: end
 -
   name: OKG ehf
@@ -276,9 +273,7 @@
   before: Chattanooga Endoscopy
   des: ASC LLC
   des_std: LLC
-  lang:
-    - en
-    - fr
+  lang: en
   position: end
 -
   name: BP p.l.c.
@@ -411,7 +406,7 @@
   name: Dr S L Ledingham - Beaumont Street Practice
   before: Dr S L Ledingham - Beaumont Street Practice
   lang: en
-  skip_unless_lang: 1
+  skip_unless_lang: Y
   position: none
 -
   name: Sears Roebuck and Company
@@ -594,6 +589,7 @@
   des: LLC
   des_std: LLC
   lang: en
+  position: end
 -
   name: ADVANSOFT (L. L. C. )
   before: ADVANSOFT
