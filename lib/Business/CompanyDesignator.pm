@@ -355,26 +355,26 @@ sub split_designator {
 
   # Designators are usually final, so try $end_re first
   if ($end_re &&
-      $company_name_match =~ m/^\s*(.*?)${punct_class}\s*\(?($end_re)\)?\s*$/) {
+      $company_name_match =~ m/^\s*(.+?)\s*${punct_class}\s*\(?($end_re)\)?\s*$/) {
     return $self->_split_designator_result($lang, $1, $2, undef, $end_asr->source($^R));
   }
 
   # No final designator - retry without a word break for the subset of languages
   # that use continuous scripts (see %LANG_CONTINUA above)
   if ($end_cont_re &&
-      $company_name_match_cont_stripped =~ m/^\s*(.*?)\(?($end_cont_re)\)?\s*$/) {
+      $company_name_match_cont_stripped =~ m/^\s*(.+?)\(?($end_cont_re)\)?\s*$/) {
     return $self->_split_designator_result($lang, $1, $2, undef, $end_cont_asr->source($^R));
   }
 
   # No final designator - check for a lead designator instead (e.g. RU, NL, etc.)
   if ($begin_re &&
-      $company_name_match =~ m/^\s*\(?($begin_re)\)?${punct_class}\s*(.*?)\s*$/) {
+      $company_name_match =~ m/^\s*\(?($begin_re)\)?${punct_class}\s*(.+?)\s*$/) {
     return $self->_split_designator_result($lang, undef, $1, $2, $begin_asr->source($^R));
   }
 
   # No final or initial - check for an embedded designator with trailing content
   if ($end_re && $allow_embedded &&
-      $company_name_match =~ m/(.*?)${punct_class}\s*\(?($end_re)\)?(?:\s+(.*?))?$/) {
+      $company_name_match =~ m/(.*?)${punct_class}\s*\(?($end_re)\)?(?:\s+(.+?))?$/) {
     return $self->_split_designator_result($lang, $1, $2, $3, $end_asr->source($^R));
   }
 
