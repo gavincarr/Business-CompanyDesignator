@@ -40,6 +40,8 @@ ok($bcd_data = $bcd->data, 'data method ok');
 
 my $i = 3;
 for my $t (@$data) {
+  next if $t->{skip};
+
   if (! $only || ($only >= $i && $only < $i+12)) {
     my $des_posn = $t->{position} // 'end';
     my $ae_match = $ae_match{ $des_posn };
