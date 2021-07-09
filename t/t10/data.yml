@@ -430,6 +430,13 @@
   lang: en
   position: end
 -
+  name: 'Sears Roebuck Co.'
+  before: Sears Roebuck
+  des: 'Co.'
+  des_std: 'Co.'
+  lang: en
+  position: end
+-
   name: 'Hakuyosha   Company   Ltd.'
   before: Hakuyosha
   des: Company   Ltd.
@@ -681,6 +688,36 @@
   des_std: gGmbH
   lang: de
   position: end
+-
+  name: Siess, v. Loë Co. (GmbH & Co. KG)
+  before: Siess, v. Loë Co
+  des: GmbH & Co. KG
+  des_std: GmbH & Co. KG
+  lang: de
+  position: end
+-
+  name: Siess, v. Loë Co. (GmbH & Co.KG)
+  before: Siess, v. Loë Co
+  des: GmbH & Co.KG
+  des_std: GmbH & Co. KG
+  lang: de
+  position: end
+  skip: Y
+-
+  name: MSV Duisburg GmbH & Co. KGaA
+  before: MSV Duisburg
+  des: GmbH & Co. KGaA
+  des_std: GmbH & Co. KGaA
+  lang: de
+  position: end
+-
+  name: MSV Duisburg GmbH & Co.KGaA
+  before: MSV Duisburg
+  des: GmbH & Co.KGaA
+  des_std: GmbH & Co. KGaA
+  lang: de
+  position: end
+  skip: Y
 -
   name: TELEFONICA DE ESPANA S.A.U.
   before: TELEFONICA DE ESPANA
