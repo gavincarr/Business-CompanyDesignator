@@ -91,6 +91,7 @@ Commanditaire vennootschap:
   lang: nl
   lead: Y
 Company:
+  abbr_std: Company
   abbr:
     - Co.
     - '& Co.'
