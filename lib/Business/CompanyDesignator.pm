@@ -304,12 +304,7 @@ sub _split_designator_result {
   }
 
   # Prepend is used where a leading ampersand gets matched as punctuation
-  if ($prepend) {
-    if ($des_std eq $des) {
-      $des_std = "$prepend $des_std";
-    }
-    $des = "$prepend $des";
-  }
+  $des = "$prepend $des" if $prepend;
 
   # Legacy interface - return a simple before / des / after tuple, plus $des_std
   return map { defined $_ && ! ref $_ ? NFC($_) : '' } ($before, $des, $after, $des_std)

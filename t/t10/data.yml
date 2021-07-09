@@ -412,28 +412,28 @@
   name: Sears Roebuck and Company
   before: Sears Roebuck
   des: and Company
-  des_std: and Company
+  des_std: Company
   lang: en
   position: end
 -
   name: Sears Roebuck And Co.
   before: Sears Roebuck
   des: And Co.
-  des_std: and Co.
+  des_std: Company
   lang: en
   position: end
 -
   name: 'Sears Roebuck & Co.'
   before: Sears Roebuck
   des: '& Co.'
-  des_std: '& Co.'
+  des_std: Company
   lang: en
   position: end
 -
   name: 'Sears Roebuck Co.'
   before: Sears Roebuck
   des: 'Co.'
-  des_std: 'Co.'
+  des_std: Company
   lang: en
   position: end
 -
