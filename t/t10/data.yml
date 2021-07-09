@@ -668,6 +668,27 @@
   lang: en
   position: end
 -
+  name: Abu Dhabi Islamic Bank P.J.S.C
+  before: Abu Dhabi Islamic Bank
+  des: P.J.S.C
+  des_std: PJSC
+  lang: en
+  position: end
+-
+  name: AJMAN BANK /P.S.C
+  before: AJMAN BANK
+  des: P.S.C
+  des_std: PJSC
+  lang: en
+  position: end
+-
+  name: Abu Dhabi Distribution Company PSC
+  before: Abu Dhabi Distribution Company
+  des: PSC
+  des_std: PJSC
+  lang: en
+  position: end
+-
   name: Astra Industrial Group Co. PJSC
   before: Astra Industrial Group
   des: Co. PJSC
