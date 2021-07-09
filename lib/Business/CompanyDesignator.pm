@@ -285,7 +285,7 @@ sub regex {
 # Helper to return split_designator results
 sub _split_designator_result {
   my $self = shift;
-  my ($lang, $before, $des, $after, $matched_pattern) = @_;
+  my ($lang, $before, $des, $after, $matched_pattern, $prepend) = @_;
 
   # $before can end in whitespace (that we don't want to consume in the RE
   # for technical reasons around handling punctuation like '& Co' in designators)
@@ -303,6 +303,14 @@ sub _split_designator_result {
     }
   }
 
+  # Prepend is used where a leading ampersand gets matched as punctuation
+  if ($prepend) {
+    if ($des_std eq $des) {
+      $des_std = "$prepend $des_std";
+    }
+    $des = "$prepend $des";
+  }
+
   # Legacy interface - return a simple before / des / after tuple, plus $des_std
   return map { defined $_ && ! ref $_ ? NFC($_) : '' } ($before, $des, $after, $des_std)
     if wantarray;
@@ -317,12 +325,12 @@ sub _split_designator_result {
   );
 }
 
-# Split $company_name on (the first) company designator, returning a triplet of strings:
-# ($before, $designator, $after), plus the normalised form of the designator. If no
-# designator is found, just returns ($company_name).
-# e.g. matching "ABC Pty Ltd" would return "Pty Ltd" for $designator, but "Pty. Ltd." for
-# the normalised form, and "Accessoires XYZ Ltee" would return "Ltee" for $designator,
-# but "Ltée" for the normalised form
+# Split $company_name on (the first) company designator, returning a triplet of
+# strings: ($before, $designator, $after), plus the normalised form of the
+# designator. If no designator is found, just returns ($company_name).
+# e.g. matching "ABC Pty Ltd" would return "Pty Ltd" for $designator, but
+# "Pty. Ltd." for the normalised form, and "Accessoires XYZ Ltee" would
+# return "Ltee" for $designator, but "Ltée" for the normalised form.
 sub split_designator {
   my $self = shift;
   my ($company_name, %arg) = @_;
@@ -355,8 +363,12 @@ sub split_designator {
 
   # Designators are usually final, so try $end_re first
   if ($end_re &&
-      $company_name_match =~ m/^\s*(.+?)\s*${punct_class}\s*\(?($end_re)\)?\s*$/) {
-    return $self->_split_designator_result($lang, $1, $2, undef, $end_asr->source($^R));
+      $company_name_match =~ m/^\s*(.+?)\s*(${punct_class})\s*\(?($end_re)\)?\s*$/) {
+    # Handle designator leading '& ' getting captured as punctuation
+    if ($2 eq '&') {
+      return $self->_split_designator_result($lang, $1, $3, undef, $end_asr->source($^R), $2);
+    }
+    return $self->_split_designator_result($lang, $1, $3, undef, $end_asr->source($^R));
   }
 
   # No final designator - retry without a word break for the subset of languages
