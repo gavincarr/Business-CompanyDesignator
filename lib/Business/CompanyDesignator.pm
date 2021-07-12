@@ -341,7 +341,7 @@ sub split_designator {
 
   # Minimal preprocessing
   # Try and normalise strange dot-space patterns with initials e.g. P .J . S . C
-  $company_name_match =~ s/\pZ\.\pZ?/. /g;
+  $company_name_match =~ s/\pZ+\.\pZ*/. /g;
   # Strip all brackets for continuous language matching
   (my $company_name_match_cont_stripped = $company_name_match) =~ s/[()\x{ff08}\x{ff09}]//g;
 
