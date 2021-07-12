@@ -339,9 +339,13 @@ sub split_designator {
                        '[\s\p{XPosixPunct}]' :
                        '[\s[:punct:]]';
 
+  # Minimal preprocessing
+  # Try and normalise strange dot-space patterns with initials e.g. P .J . S . C
+  $company_name_match =~ s/\pZ\.\pZ?/. /g;
   # Strip all brackets for continuous language matching
   (my $company_name_match_cont_stripped = $company_name_match) =~ s/[()\x{ff08}\x{ff09}]//g;
 
+  # Get required regexes
   my ($end_re, $end_asr, $end_cont_re, $end_cont_asr, $begin_re, $begin_asr);
   if ($lang) {
     if ($LANG_CONTINUA{$lang}) {
