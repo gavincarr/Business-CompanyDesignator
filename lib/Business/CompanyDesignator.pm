@@ -127,7 +127,7 @@ sub _add_to_assembler {
   # https://rt.cpan.org/Public/Bug/Display.html?id=74449
   # $assembler->add($string)
   # Workaround by lexing and using insert()
-  my $optional1 = '\\.?,?\\s*';
+  my $optional1 = '\\.*,?\\s*';
   my @pattern = map {
     # Periods are treated as optional literals, with optional trailing commas and/or whitespace
     /\./   ? $optional1 :
