@@ -127,10 +127,10 @@ sub _add_to_assembler {
   # https://rt.cpan.org/Public/Bug/Display.html?id=74449
   # $assembler->add($string)
   # Workaround by lexing and using insert()
-  my $optional1 = '\\.*,?\\s*';
+  my $optional = '\\.*,?\\s*';
   my @pattern = map {
     # Periods are treated as optional literals, with optional trailing commas and/or whitespace
-    /\./   ? $optional1 :
+    /\./   ? $optional :
     # Embedded spaces can be multiple, and include leading commas
     / /    ? ',?\s+' :
     # Escape other regex metacharacters
@@ -144,11 +144,11 @@ sub _add_to_assembler {
   # Special case - optional match characters can cause clashes between
   # distinct pattern_strings e.g. /A\.?,?\s*S\.?,?\s*/ clashes with /AS/
   # We need to handle such cases as ambiguous with extra checks
-  my $optional1e = "\Q$optional1\E";
+  my $optional_esc = "\Q$optional\E";
   my $alt_pattern_string1;
   if ($pattern_string =~ /^(\w)(\w)$/) {
-    $alt_pattern_string1 = "$1$optional1$2$optional1";
-  } elsif ($pattern_string =~ /^(\w)$optional1e(\w)$optional1e$/) {
+    $alt_pattern_string1 = "$1$optional$2$optional";
+  } elsif ($pattern_string =~ /^(\w)$optional_esc(\w)$optional_esc$/) {
     $alt_pattern_string1 = "$1$2";
   }
 
