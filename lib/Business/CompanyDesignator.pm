@@ -122,6 +122,10 @@ sub _add_to_assembler {
   $reference_string ||= $string;
 # printf "+ add_to_assembler (%s): '%s' => '%s'\n", join(',', @{ $lang || []}), $string, $reference_string;
 
+  # Remove trailing space after periods, since we will allow that explicitly
+  $string =~ s/\.\s+/./g;
+  # Coalesce spaces before processing, just in case multiple have slipped in
+  $string =~ s/\s+/ /g;
   # Allow spaces around ampersands to be optional
   $string =~ s/\s+&   /\\s*&/gx;
   $string =~ s/   &\s+/&\\s*/gx;
@@ -131,32 +135,39 @@ sub _add_to_assembler {
   # https://rt.cpan.org/Public/Bug/Display.html?id=74449
   # $assembler->add($string)
   # Workaround by lexing and using insert()
-  my $optional = '\\.*,?\\s*';
+  # Intepret spaces pretty liberally
+  my $space_class = '[\s,()-]';
+  my $optional = "\\.*$space_class*";
   my @pattern = map {
     # Periods are treated as optional literals, with optional trailing commas and/or whitespace
     /\./   ? $optional :
-    # Embedded spaces can be multiple, and include leading commas
-    / /    ? ',?\s+' :
+    # Interpret spaces fairly liberally
+    / /    ? "$space_class+" :
     # Escape other regex metacharacters
     /[()]/ ? "\\$_" :
     # Allow ampersands to match a few other symbols
     /&/    ? "[&+]" :
     $_
   } split //, $string;
-  $assembler->insert(@pattern);
+  # Always allow designators to be bracketed
+  my @pattern2 = ( '\(?', @pattern, '\)?' );
+  $assembler->insert(@pattern2);
 
   # Also add pattern => $string mapping to pattern_string_map and pattern_string_map_lang
   my $pattern_string = join '', @pattern;
+  #say "+ pattern_string: $pattern_string";
 
   # Special case - optional match characters can cause clashes between
   # distinct pattern_strings e.g. /A\.?,?\s*S\.?,?\s*/ clashes with /AS/
   # We need to handle such cases as ambiguous with extra checks
-  my $optional_esc = "\Q$optional\E";
+  my $optional_esc = "\Q$optional";
   my $alt_pattern_string1;
   if ($pattern_string =~ /^(\w)(\w)$/) {
     $alt_pattern_string1 = "$1$optional$2$optional";
+    #say "+ (1) set alt_pattern_string1 for '$pattern_string' to '$alt_pattern_string1'";
   } elsif ($pattern_string =~ /^(\w)$optional_esc(\w)$optional_esc$/) {
     $alt_pattern_string1 = "$1$2";
+    #say "+ (2) set alt_pattern_string1 for '$pattern_string' to '$alt_pattern_string1'";
   }
 
   # If $pattern_string already exists in pattern_string_map then the pattern is ambiguous
@@ -310,8 +321,8 @@ sub _split_designator_result {
     }
   }
 
-  # Prepend is used where a leading ampersand gets matched as punctuation
-  $des = "$prepend $des" if $prepend;
+  # Prepend is used where leading punctuation should be included in $des
+  $des = $prepend . $des if $prepend && $des;
 
   # Legacy interface - return a simple before / des / after tuple, plus $des_std
   return map { defined $_ && ! ref $_ ? NFC($_) : '' } ($before, $des, $after, $des_std)
@@ -345,6 +356,7 @@ sub split_designator {
   state $punct_class = eval { '.' =~ m/\p{XPosixPunct}/ } ?
                        '[\s\p{XPosixPunct}]' :
                        '[\s[:punct:]]';
+  state $des_leading_punct_class = qr/[&(]/;
 
   # Minimal preprocessing
   # Try and normalise strange dot-space patterns with initials e.g. P .J . S . C
@@ -369,30 +381,36 @@ sub split_designator {
 
   # Designators are usually final, so try $end_re first
   if ($end_re &&
-      $company_name_match =~ m/^\s*(.+?)\s*(${punct_class})\s*\(?($end_re)\)?\s*$/) {
-    # Handle designator leading '& ' getting captured as punctuation
-    if ($2 eq '&') {
-      return $self->_split_designator_result($lang, $1, $3, undef, $end_asr->source($^R), $2);
+      $company_name_match =~ m/^\s*(.+?)\s*(${punct_class})\s*($end_re)\s*$/) {
+    # Handle leading punctuation that we want to include in the des
+    my $before = $1;
+    my $punct = $2;
+    my $des = $3;
+    if ($punct =~ $des_leading_punct_class) {
+      $punct = "$punct " if $punct ne '(';
+      return $self->_split_designator_result($lang, $before, $des, undef,
+        $end_asr->source($^R), $punct);
     }
-    return $self->_split_designator_result($lang, $1, $3, undef, $end_asr->source($^R));
+    return $self->_split_designator_result($lang, $before, $des, undef,
+      $end_asr->source($^R));
   }
 
   # No final designator - retry without a word break for the subset of languages
   # that use continuous scripts (see %LANG_CONTINUA above)
   if ($end_cont_re &&
-      $company_name_match_cont_stripped =~ m/^\s*(.+?)\(?($end_cont_re)\)?\s*$/) {
+      $company_name_match_cont_stripped =~ m/^\s*(.+?)($end_cont_re)\s*$/) {
     return $self->_split_designator_result($lang, $1, $2, undef, $end_cont_asr->source($^R));
   }
 
   # No final designator - check for a lead designator instead (e.g. RU, NL, etc.)
   if ($begin_re &&
-      $company_name_match =~ m/^\s*\(?($begin_re)\)?${punct_class}\s*(.+?)\s*$/) {
+      $company_name_match =~ m/^\s*($begin_re)${punct_class}\s*(.+?)\s*$/) {
     return $self->_split_designator_result($lang, undef, $1, $2, $begin_asr->source($^R));
   }
 
   # No final or initial - check for an embedded designator with trailing content
   if ($end_re && $allow_embedded &&
-      $company_name_match =~ m/(.*?)${punct_class}\s*\(?($end_re)\)?(?:\s+(.+?))?$/) {
+      $company_name_match =~ m/(.*?)${punct_class}\s*($end_re)(?:\s+(.+?))?$/) {
     return $self->_split_designator_result($lang, $1, $2, $3, $end_asr->source($^R));
   }
 
