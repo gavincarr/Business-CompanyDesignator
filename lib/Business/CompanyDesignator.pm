@@ -122,6 +122,10 @@ sub _add_to_assembler {
   $reference_string ||= $string;
 # printf "+ add_to_assembler (%s): '%s' => '%s'\n", join(',', @{ $lang || []}), $string, $reference_string;
 
+  # Allow spaces around ampersands to be optional
+  $string =~ s/\s+&   /\\s*&/gx;
+  $string =~ s/   &\s+/&\\s*/gx;
+
   # FIXME: RA->add() doesn't work here because of known quantifier-escaping bugs:
   # https://rt.cpan.org/Public/Bug/Display.html?id=50228
   # https://rt.cpan.org/Public/Bug/Display.html?id=74449
@@ -134,7 +138,10 @@ sub _add_to_assembler {
     # Embedded spaces can be multiple, and include leading commas
     / /    ? ',?\s+' :
     # Escape other regex metacharacters
-    /[()]/ ? "\\$_" : $_
+    /[()]/ ? "\\$_" :
+    # Allow ampersands to match a few other symbols
+    /&/    ? "[&+]" :
+    $_
   } split //, $string;
   $assembler->insert(@pattern);
 
