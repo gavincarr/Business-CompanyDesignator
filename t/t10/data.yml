@@ -710,6 +710,13 @@
   lang: de
   position: end
 -
+  name: Krauss-Maffei Wegmann GmbH und Co. KG
+  before: Krauss-Maffei Wegmann
+  des: GmbH und Co. KG
+  des_std: KG
+  lang: de
+  position: end
+-
   name: Siess, v. Loë Co. (GmbH & Co. KG)
   before: Siess, v. Loë Co
   des: (GmbH & Co. KG)
