@@ -55,8 +55,8 @@ for my $t (@$data) {
   if (! $only || ($only >= $i && $only <= $i+2)) {
     is($before, $exp_before, "(array) $t->{name}: before ok: $before");
     is($des, $exp_des, "(array) $t->{name} designator ok: " . ($des // 'undef'));
-    # If $des_std is undef, then it's ambiguous and we should skip this test
-    if ($des_std) {
+    # If $exp_des_std is unset, then it's ambiguous and we should skip this test
+    if ($exp_des_std) {
       is($des_std, $exp_des_std, "(array) $t->{name} designator_std ok: " . ($des_std // 'undef'));
     }
   }
@@ -83,8 +83,8 @@ for my $t (@$data) {
   if (! $only || ($only >= $i && $only <= $i+4)) {
     is($res->before, $exp_before, "(scalar) $t->{name}: before ok: " . $res->before);
     is($res->designator, $exp_des // '', "(scalar) $t->{name} designator ok: " . ($res->designator // 'undef'));
-    # If $des_std is undef, then it's ambiguous and we should skip this test
-    if ($res->designator_std) {
+    # If $exp_des_std is unset, then it's ambiguous and we should skip this test
+    if ($exp_des_std) {
       is($res->designator_std, $exp_des_std // '', "(scalar) $t->{name} designator_std ok: " . ($res->designator_std // 'undef'));
     }
     is($res->short_name, $short_name, "(scalar) $t->{name} short_name ok: " . $res->short_name);

@@ -43,12 +43,14 @@ for my $t (@$data) {
   my $lang          = $t->{lang};
 
   # Array-context split_designator
-  my ($before, $des, $after, $normalised_des) = $bcd->split_designator($t->{name}, lang => $lang);
+  my ($before, $des, $after, $des_std) = $bcd->split_designator($t->{name}, lang => $lang);
 
   if (! $only || ($only >= $i && $only <= $i+2)) {
     is($before, $exp_before, "(array) $t->{name}: before ok: $before");
     is($des, $exp_des, "(array) $t->{name} designator ok: " . ($des // 'undef'));
-    is($normalised_des, $exp_des_std, "(array) $t->{name} normalised_des ok: " . ($normalised_des // 'undef'));
+    if ($exp_des_std) {
+      is($des_std, $exp_des_std, "(array) $t->{name} designator_std ok: " . ($des_std//'undef'));
+    }
   }
   $i += 3;
   if ($exp_after || $after) {
@@ -58,9 +60,9 @@ for my $t (@$data) {
     $i += 1;
   }
 
-  # Test that $normalised_des maps back to one or more records
-  if ($normalised_des) {
-    my @records = $bcd->records($normalised_des);
+  # Test that $des_std maps back to one or more records
+  if ($des_std) {
+    my @records = $bcd->records($des_std);
     if (! $only || $only == $i) {
       ok(scalar @records, 'records returned ' . scalar(@records) . ' record(s): '
         . join(',', map { $_->long } @records));
@@ -73,7 +75,9 @@ for my $t (@$data) {
   if (! $only || ($only >= $i && $only <= $i+2)) {
     is($res->before, $exp_before, "(scalar) $t->{name}: before ok: " . $res->before);
     is($res->designator, $exp_des // '', "(scalar) $t->{name} designator ok: " . ($res->designator // 'undef'));
-    is($res->designator_std, $exp_des_std // '', "(scalar) $t->{name} designator_std ok: " . ($res->designator_std // 'undef'));
+    if ($exp_des_std) {
+      is($res->designator_std, $exp_des_std // '', "(scalar) $t->{name} designator_std ok: " . ($res->designator_std // 'undef'));
+    }
   }
   $i += 3;
   if ($res->after || $after) {
